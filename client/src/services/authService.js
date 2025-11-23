@@ -10,6 +10,9 @@ const authService = {
   updateProfile: (userData) => apiClient.put('/auth/profile', userData),
   changePassword: (oldPassword, newPassword) =>
     apiClient.post('/auth/change-password', { oldPassword, newPassword }),
+  deleteAccount: () => apiClient.delete('/auth/delete-account'),
+  requestPasswordReset: (email) => apiClient.post('/auth/forgot-password', { email }),
+  resetPassword: (token, newPassword) => apiClient.post('/auth/reset-password', { token, newPassword }),
 };
 
 export default authService;

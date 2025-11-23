@@ -3,6 +3,21 @@ const emailService = require('../services/emailService');
 const logger = require('../utils/logger');
 
 /**
+ * Normalize stage value to match schema enum
+ */
+const normalizeStage = (stage) => {
+  if (!stage) return 'Prospecting';
+  const stageMap = {
+    prospecting: 'Prospecting',
+    qualification: 'Qualification',
+    proposal: 'Proposal',
+    negotiation: 'Negotiation',
+    closed: 'Closed Won',
+  };
+  return stageMap[stage.toLowerCase()] || 'Prospecting';
+};
+
+/**
  * Deal Controller
  */
 class DealController {
@@ -14,6 +29,7 @@ class DealController {
       const dealData = {
         ...req.body,
         owner: req.body.owner || req.user._id,
+        stage: normalizeStage(req.body.stage),
       };
 
       const deal = await dealService.createDeal(dealData);
@@ -43,7 +59,7 @@ class DealController {
       const { page = 1, limit = 20, stage, owner, status, minValue, maxValue } = req.query;
 
       const filters = {};
-      if (stage) filters.stage = stage;
+      if (stage) filters.stage = normalizeStage(stage);
       if (owner) filters.owner = owner;
       if (status) filters.status = status;
       if (minValue) filters.minValue = parseInt(minValue);
@@ -82,7 +98,12 @@ class DealController {
    */
   async updateDeal(req, res, next) {
     try {
-      const deal = await dealService.updateDeal(req.params.id, req.body);
+      const updateData = { ...req.body };
+      if (updateData.stage) {
+        updateData.stage = normalizeStage(updateData.stage);
+      }
+      
+      const deal = await dealService.updateDeal(req.params.id, updateData);
       res.json({
         success: true,
         data: deal,

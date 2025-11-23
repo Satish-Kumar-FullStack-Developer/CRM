@@ -20,11 +20,11 @@ const ReportsPage = () => {
   }, [dispatch]);
 
   const totalDealsValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
-  const closedDealsValue = deals.filter((d) => d.stage === 'closed').reduce((sum, d) => sum + (d.value || 0), 0);
-  const qualifiedLeads = leads.filter((l) => l.status === 'qualified').length;
+  const closedDealsValue = deals.filter((d) => d.stage === 'Closed Won' || d.stage === 'Closed Lost').reduce((sum, d) => sum + (d.value || 0), 0);
+  const qualifiedLeads = leads.filter((l) => l.status === 'Qualified').length;
   const conversionRate = leads.length > 0 ? Math.round((qualifiedLeads / leads.length) * 100) : 0;
   const avgDealSize = deals.length > 0 ? Math.round(totalDealsValue / deals.length) : 0;
-  const winRate = deals.length > 0 ? Math.round((deals.filter((d) => d.stage === 'closed').length / deals.length) * 100) : 0;
+  const winRate = deals.length > 0 ? Math.round((deals.filter((d) => d.stage === 'Closed Won').length / deals.length) * 100) : 0;
   const completedTasks = tasks.filter((t) => t.status === 'Completed').length;
 
   return (
@@ -89,7 +89,7 @@ const ReportsPage = () => {
                 <BarChart3 size={24} color="#2563eb" /> Sales Pipeline
               </h2>
               <div style={{ space: '1rem' }}>
-                {['prospecting', 'qualification', 'proposal', 'negotiation', 'closed'].map((stage) => {
+                {['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'].map((stage) => {
                   const stageDeals = deals.filter((d) => d.stage === stage);
                   const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
                   const percentage = totalDealsValue > 0 ? (stageValue / totalDealsValue) * 100 : 0;
@@ -124,14 +124,14 @@ const ReportsPage = () => {
                 <PieChart size={24} color="#10b981" /> Lead Status Distribution
               </h2>
               <div style={{ space: '1rem' }}>
-                {['new', 'contacted', 'qualified', 'lost'].map((status) => {
+                {['New', 'Contacted', 'Qualified', 'Lost'].map((status) => {
                   const statusLeads = leads.filter((l) => l.status === status);
                   const percentage = leads.length > 0 ? (statusLeads.length / leads.length) * 100 : 0;
                   const colorsBg = {
-                    new: '#1e40af',
-                    contacted: '#15803d',
-                    qualified: '#6b21a8',
-                    lost: '#7f1d1d'
+                    New: '#1e40af',
+                    Contacted: '#15803d',
+                    Qualified: '#6b21a8',
+                    Lost: '#7f1d1d'
                   };
                   return (
                     <div key={status} style={{ marginBottom: '24px' }}>

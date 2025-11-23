@@ -58,6 +58,8 @@ const userSchema = new mongoose.Schema(
       language: String,
       preferences: mongoose.Schema.Types.Mixed,
     },
+    resetToken: String,
+    resetTokenExpires: Date,
   },
   { timestamps: true }
 );
@@ -79,6 +81,8 @@ userSchema.methods.toJSON = function () {
   delete user.password;
   delete user.loginAttempts;
   delete user.lockUntil;
+  delete user.resetToken;
+  delete user.resetTokenExpires;
   return user;
 };
 

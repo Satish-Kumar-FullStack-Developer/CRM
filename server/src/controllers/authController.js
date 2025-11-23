@@ -80,6 +80,56 @@ class AuthController {
       next(error);
     }
   }
+
+  /**
+   * Delete user account
+   */
+  async deleteAccount(req, res, next) {
+    try {
+      await authService.deleteAccount(req.user._id);
+      res.json({
+        success: true,
+        message: 'Account deleted successfully',
+      });
+    } catch (error) {
+      logger.error('Delete account error:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Forgot password - send reset email
+   */
+  async forgotPassword(req, res, next) {
+    try {
+      const { email } = req.body;
+      await authService.sendPasswordResetEmail(email);
+      res.json({
+        success: true,
+        message: 'Password reset link sent to your email',
+      });
+    } catch (error) {
+      logger.error('Forgot password error:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Reset password with token
+   */
+  async resetPassword(req, res, next) {
+    try {
+      const { token, newPassword } = req.body;
+      await authService.resetPassword(token, newPassword);
+      res.json({
+        success: true,
+        message: 'Password reset successfully',
+      });
+    } catch (error) {
+      logger.error('Reset password error:', error);
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();

@@ -35,12 +35,43 @@ const LeadsPage = () => {
   });
 
   const handleAddLead = async () => {
-    if (!formData.firstName || !formData.email) {
-      toast.error('Please fill in required fields');
+    // Validation
+    if (!formData.firstName || formData.firstName.trim().length < 2) {
+      toast.error('First name must be at least 2 characters');
       return;
     }
+    if (!formData.lastName || formData.lastName.trim().length < 2) {
+      toast.error('Last name must be at least 2 characters');
+      return;
+    }
+    if (!formData.email) {
+      toast.error('Email is required');
+      return;
+    }
+    
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     try {
-      await dispatch(createLead(formData));
+      // Normalize status to match backend enum (e.g., "new" -> "New")
+      const statusMap = {
+        new: 'New',
+        contacted: 'Contacted',
+        qualified: 'Qualified',
+        unqualified: 'Unqualified',
+        lost: 'Lost',
+      };
+
+      await dispatch(createLead({
+        ...formData,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        status: statusMap[formData.status] || 'New',
+      }));
       setFormData({
         firstName: '',
         lastName: '',

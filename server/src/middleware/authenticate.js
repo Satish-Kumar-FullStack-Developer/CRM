@@ -1,5 +1,6 @@
 const { verifyToken } = require('../utils/jwt');
 const User = require('../models/User');
+const Role = require('../models/Role');
 const logger = require('../utils/logger');
 
 /**
@@ -17,7 +18,7 @@ const authenticate = async (req, res, next) => {
     }
 
     const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id).populate('role');
+    let user = await User.findById(decoded.id).populate('role');
 
     if (!user) {
       return res.status(401).json({
@@ -31,6 +32,16 @@ const authenticate = async (req, res, next) => {
         success: false,
         message: 'User account is inactive',
       });
+    }
+
+    // Auto-assign role if user doesn't have one
+    if (!user.role) {
+      const defaultRole = await Role.findOne({ name: 'Sales Rep' });
+      if (defaultRole) {
+        user.role = defaultRole._id;
+        await User.findByIdAndUpdate(decoded.id, { role: defaultRole._id });
+        user = await User.findById(decoded.id).populate('role');
+      }
     }
 
     req.user = user;

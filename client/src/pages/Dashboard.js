@@ -1,52 +1,51 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
-import reportService from '../services/reportService';
 import { Users, DollarSign, CheckCircle, TrendingUp } from 'lucide-react';
+import { fetchLeads } from '../redux/leadSlice';
+import { fetchTasks } from '../redux/taskSlice';
+import { fetchDeals } from '../redux/dealSlice';
 
 /**
  * Dashboard Page with Inline Styles for Perfect Alignment
  */
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const [analytics, setAnalytics] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const { leads, isLoading: leadsLoading } = useSelector((state) => state.leads);
+  const { tasks, isLoading: tasksLoading } = useSelector((state) => state.tasks);
+  const { deals, isLoading: dealsLoading } = useSelector((state) => state.deals);
 
-  const fetchAnalytics = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      if (user) {
-        const response = await reportService.getDashboardAnalytics();
-        setAnalytics(response.data.data);
-      } else {
-        setAnalytics({
-          totalLeads: 24,
-          qualifiedLeads: 8,
-          totalDeals: 12,
-          dealsWon: 5,
-          totalTasks: 42,
-          completedTasks: 18,
-        });
-      }
-    } catch (error) {
-      setAnalytics({
-        totalLeads: 24,
-        qualifiedLeads: 8,
-        totalDeals: 12,
-        dealsWon: 5,
-        totalTasks: 42,
-        completedTasks: 18,
-      });
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+  const loading = leadsLoading || tasksLoading || dealsLoading;
 
+  // Fetch all data on component mount
   React.useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    dispatch(fetchLeads());
+    dispatch(fetchTasks());
+    dispatch(fetchDeals());
+  }, [dispatch]);
+
+  // Calculate analytics from Redux state
+  const analytics = React.useMemo(() => {
+    const totalLeads = leads?.length || 0;
+    const qualifiedLeads = leads?.filter((lead) => lead.status === 'Qualified')?.length || 0;
+    const totalDeals = deals?.length || 0;
+    const dealsWon = deals?.filter((deal) => deal.stage === 'Closed Won')?.length || 0;
+    const totalTasks = tasks?.length || 0;
+    const completedTasks = tasks?.filter((task) => task.status === 'Completed')?.length || 0;
+
+    return {
+      totalLeads,
+      qualifiedLeads,
+      totalDeals,
+      dealsWon,
+      totalTasks,
+      completedTasks,
+    };
+  }, [leads, tasks, deals]);
 
   if (loading) {
     return (
@@ -133,16 +132,32 @@ const Dashboard = () => {
 
           {/* Quick Actions - 4 columns */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
-            <button style={{ padding: '16px 24px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)', transition: 'all 0.3s' }} onMouseEnter={(e) => { e.target.style.background = '#1d4ed8'; e.target.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.background = '#2563eb'; e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
+            <button 
+              onClick={() => navigate('/leads')}
+              style={{ padding: '16px 24px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)', transition: 'all 0.3s' }} 
+              onMouseEnter={(e) => { e.target.style.background = '#1d4ed8'; e.target.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} 
+              onMouseLeave={(e) => { e.target.style.background = '#2563eb'; e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
               ➕ Add Lead
             </button>
-            <button style={{ padding: '16px 24px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)', transition: 'all 0.3s' }} onMouseEnter={(e) => { e.target.style.background = '#15803d'; e.target.style.boxShadow = '0 6px 16px rgba(22, 163, 74, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.background = '#16a34a'; e.target.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
+            <button 
+              onClick={() => navigate('/deals')}
+              style={{ padding: '16px 24px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)', transition: 'all 0.3s' }} 
+              onMouseEnter={(e) => { e.target.style.background = '#15803d'; e.target.style.boxShadow = '0 6px 16px rgba(22, 163, 74, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} 
+              onMouseLeave={(e) => { e.target.style.background = '#16a34a'; e.target.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
               💼 Add Deal
             </button>
-            <button style={{ padding: '16px 24px', background: '#a855f7', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)', transition: 'all 0.3s' }} onMouseEnter={(e) => { e.target.style.background = '#9333ea'; e.target.style.boxShadow = '0 6px 16px rgba(168, 85, 247, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.background = '#a855f7'; e.target.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
+            <button 
+              onClick={() => navigate('/tasks')}
+              style={{ padding: '16px 24px', background: '#a855f7', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)', transition: 'all 0.3s' }} 
+              onMouseEnter={(e) => { e.target.style.background = '#9333ea'; e.target.style.boxShadow = '0 6px 16px rgba(168, 85, 247, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} 
+              onMouseLeave={(e) => { e.target.style.background = '#a855f7'; e.target.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
               📝 Add Task
             </button>
-            <button style={{ padding: '16px 24px', background: '#64748b', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(100, 116, 139, 0.3)', transition: 'all 0.3s' }} onMouseEnter={(e) => { e.target.style.background = '#475569'; e.target.style.boxShadow = '0 6px 16px rgba(100, 116, 139, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.background = '#64748b'; e.target.style.boxShadow = '0 4px 12px rgba(100, 116, 139, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
+            <button 
+              onClick={() => navigate('/reports')}
+              style={{ padding: '16px 24px', background: '#64748b', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(100, 116, 139, 0.3)', transition: 'all 0.3s' }} 
+              onMouseEnter={(e) => { e.target.style.background = '#475569'; e.target.style.boxShadow = '0 6px 16px rgba(100, 116, 139, 0.4)'; e.target.style.transform = 'translateY(-2px)'; }} 
+              onMouseLeave={(e) => { e.target.style.background = '#64748b'; e.target.style.boxShadow = '0 4px 12px rgba(100, 116, 139, 0.3)'; e.target.style.transform = 'translateY(0)'; }}>
               📊 View Reports
             </button>
           </div>

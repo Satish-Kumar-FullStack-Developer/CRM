@@ -3,6 +3,20 @@ const emailService = require('../services/emailService');
 const logger = require('../utils/logger');
 
 /**
+ * Normalize priority value to match schema enum
+ */
+const normalizePriority = (priority) => {
+  if (!priority) return 'Medium';
+  const priorityMap = {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    urgent: 'Urgent',
+  };
+  return priorityMap[priority.toLowerCase()] || 'Medium';
+};
+
+/**
  * Task Controller
  */
 class TaskController {
@@ -14,7 +28,17 @@ class TaskController {
       const taskData = {
         ...req.body,
         assignedBy: req.user._id,
+        // If assignedTo not provided, assign to self
+        assignedTo: req.body.assignedTo || req.user._id,
+        priority: normalizePriority(req.body.priority),
       };
+
+      // Set default dueDate if not provided
+      if (!taskData.dueDate) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        taskData.dueDate = tomorrow;
+      }
 
       const task = await taskService.createTask(taskData);
 
@@ -38,7 +62,7 @@ class TaskController {
       const filters = {};
       if (assignedTo) filters.assignedTo = assignedTo;
       if (status) filters.status = status;
-      if (priority) filters.priority = priority;
+      if (priority) filters.priority = normalizePriority(priority);
       if (type) filters.type = type;
       if (overdue === 'true') filters.overdue = true;
       if (upcoming === 'true') filters.upcoming = true;
@@ -76,7 +100,12 @@ class TaskController {
    */
   async updateTask(req, res, next) {
     try {
-      const task = await taskService.updateTask(req.params.id, req.body);
+      const updateData = { ...req.body };
+      if (updateData.priority) {
+        updateData.priority = normalizePriority(updateData.priority);
+      }
+
+      const task = await taskService.updateTask(req.params.id, updateData);
       res.json({
         success: true,
         data: task,

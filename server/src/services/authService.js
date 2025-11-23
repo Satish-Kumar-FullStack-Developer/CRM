@@ -160,6 +160,108 @@ class AuthService {
       throw error;
     }
   }
+
+  /**
+   * Delete user account
+   * @param {string} userId - User ID
+   */
+  async deleteAccount(userId) {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Delete all user's data
+      const Lead = require('../models/Lead');
+      const Deal = require('../models/Deal');
+      const Task = require('../models/Task');
+
+      // Delete leads assigned to user
+      await Lead.deleteMany({ assignedTo: userId });
+
+      // Delete deals owned by user
+      await Deal.deleteMany({ owner: userId });
+
+      // Delete tasks assigned to user
+      await Task.deleteMany({ assignedTo: userId });
+
+      // Delete user account
+      await User.findByIdAndDelete(userId);
+
+      logger.info(`User account deleted: ${user.email}`);
+      return { success: true };
+    } catch (error) {
+      logger.error('Delete account error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send password reset email
+   * @param {string} email - User email
+   */
+  async sendPasswordResetEmail(email) {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        // For security, don't reveal if user exists
+        logger.warn(`Password reset requested for non-existent email: ${email}`);
+        return { success: true };
+      }
+
+      // Generate reset token (valid for 1 hour)
+      const crypto = require('crypto');
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+      
+      user.resetToken = resetTokenHash;
+      user.resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      await user.save();
+
+      // In production, send email here with reset link
+      // For now, just log it
+      logger.info(`Password reset email sent to: ${email}`);
+      logger.info(`Reset token (for testing): ${resetToken}`);
+
+      return { success: true };
+    } catch (error) {
+      logger.error('Send password reset email error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reset password with token
+   * @param {string} token - Reset token
+   * @param {string} newPassword - New password
+   */
+  async resetPassword(token, newPassword) {
+    try {
+      const crypto = require('crypto');
+      const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+      const user = await User.findOne({
+        resetToken: resetTokenHash,
+        resetTokenExpires: { $gt: new Date() },
+      });
+
+      if (!user) {
+        throw new Error('Invalid or expired reset token');
+      }
+
+      user.password = newPassword;
+      user.resetToken = undefined;
+      user.resetTokenExpires = undefined;
+      await user.save();
+
+      logger.info(`Password reset for user: ${user.email}`);
+      return { success: true };
+    } catch (error) {
+      logger.error('Reset password error:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new AuthService();

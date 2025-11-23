@@ -3,6 +3,21 @@ const emailService = require('../services/emailService');
 const logger = require('../utils/logger');
 
 /**
+ * Normalize status value to match schema enum
+ */
+const normalizeStatus = (status) => {
+  if (!status) return 'New';
+  const statusMap = {
+    new: 'New',
+    contacted: 'Contacted',
+    qualified: 'Qualified',
+    unqualified: 'Unqualified',
+    lost: 'Lost',
+  };
+  return statusMap[status.toLowerCase()] || 'New';
+};
+
+/**
  * Lead Controller
  */
 class LeadController {
@@ -11,10 +26,13 @@ class LeadController {
    */
   async createLead(req, res, next) {
     try {
-      const lead = await leadService.createLead({
+      const leadData = {
         ...req.body,
         assignedTo: req.body.assignedTo || req.user._id,
-      });
+        status: normalizeStatus(req.body.status),
+      };
+
+      const lead = await leadService.createLead(leadData);
 
       // Send notification email
       try {
@@ -41,7 +59,7 @@ class LeadController {
       const { page = 1, limit = 20, status, assignedTo, source, search } = req.query;
 
       const filters = {};
-      if (status) filters.status = status;
+      if (status) filters.status = normalizeStatus(status);
       if (assignedTo) filters.assignedTo = assignedTo;
       if (source) filters.source = source;
       if (search) filters.search = search;
@@ -79,7 +97,12 @@ class LeadController {
    */
   async updateLead(req, res, next) {
     try {
-      const lead = await leadService.updateLead(req.params.id, req.body);
+      const updateData = { ...req.body };
+      if (updateData.status) {
+        updateData.status = normalizeStatus(updateData.status);
+      }
+
+      const lead = await leadService.updateLead(req.params.id, updateData);
       res.json({
         success: true,
         data: lead,

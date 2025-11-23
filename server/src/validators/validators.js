@@ -19,6 +19,13 @@ const loginValidator = {
   }),
 };
 
+const changePasswordValidator = {
+  body: Joi.object({
+    oldPassword: Joi.string().min(6).required(),
+    newPassword: Joi.string().min(6).max(50).required(),
+  }),
+};
+
 // Lead Validators
 const createLeadValidator = {
   body: Joi.object({
@@ -31,6 +38,7 @@ const createLeadValidator = {
     source: Joi.string()
       .valid('Website', 'Email', 'Phone', 'Referral', 'Trade Show', 'Social Media', 'Other')
       .optional(),
+    status: Joi.string().optional(),
     description: Joi.string().optional(),
   }),
 };
@@ -53,11 +61,14 @@ const createDealValidator = {
     title: Joi.string().required(),
     value: Joi.number().min(0).required(),
     currency: Joi.string().valid('USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD').optional(),
-    stage: Joi.string()
-      .valid('Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost')
-      .optional(),
+    stage: Joi.string().optional(),
+    probability: Joi.number().min(0).max(100).optional(),
+    closingDate: Joi.date().optional(),
     expectedCloseDate: Joi.date().optional(),
     description: Joi.string().optional(),
+    owner: Joi.string().optional(),
+    lead: Joi.string().optional(),
+    status: Joi.string().optional(),
   }),
 };
 
@@ -66,16 +77,19 @@ const createTaskValidator = {
   body: Joi.object({
     title: Joi.string().required(),
     type: Joi.string().valid('Call', 'Email', 'Meeting', 'Follow-up', 'Other').optional(),
-    priority: Joi.string().valid('Low', 'Medium', 'High', 'Urgent').optional(),
-    dueDate: Joi.date().required(),
+    priority: Joi.string().valid('low', 'medium', 'high', 'Low', 'Medium', 'High', 'Urgent').optional(),
+    dueDate: Joi.date().optional(),
     description: Joi.string().optional(),
-    assignedTo: Joi.string().required(),
+    assignedTo: Joi.string().optional(),
+    assignedBy: Joi.string().optional(),
+    status: Joi.string().optional(),
   }),
 };
 
 module.exports = {
   registerValidator,
   loginValidator,
+  changePasswordValidator,
   createLeadValidator,
   updateLeadValidator,
   createDealValidator,

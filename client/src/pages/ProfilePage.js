@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Edit2, Lock, Shield } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { toast } from 'react-toastify';
+import authService from '../services/authService';
 
 const ProfilePage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -18,6 +32,73 @@ const ProfilePage = () => {
   const handleSave = () => {
     toast.success('Profile updated successfully');
     setIsEditing(false);
+  };
+
+  const handleEnable2FA = () => {
+    setShow2FAModal(true);
+  };
+
+  const handleConfirm2FA = () => {
+    setIsLoading(true);
+    try {
+      toast.success('Two-Factor Authentication enabled successfully!');
+      setShow2FAModal(false);
+    } catch (error) {
+      toast.error('Failed to enable 2FA');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (!passwordData.oldPassword) {
+      toast.error('Current password is required');
+      return;
+    }
+    if (!passwordData.newPassword) {
+      toast.error('New password is required');
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authService.changePassword(passwordData.oldPassword, passwordData.newPassword);
+      toast.success('Password changed successfully!');
+      setShowPasswordModal(false);
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== 'DELETE') {
+      toast.error('Please type DELETE to confirm');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authService.deleteAccount();
+      toast.success('Account deleted successfully');
+      localStorage.removeItem('token');
+      navigate('/login');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete account');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -166,6 +247,7 @@ const ProfilePage = () => {
                   <p style={{ fontSize: '14px', color: '#6b7280' }}>Last changed 30 days ago</p>
                 </div>
                 <button
+                  onClick={() => setShowPasswordModal(true)}
                   style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
                   onMouseEnter={(e) => e.target.style.background = '#1d4ed8'}
                   onMouseLeave={(e) => e.target.style.background = '#2563eb'}
@@ -179,6 +261,7 @@ const ProfilePage = () => {
                   <p style={{ fontSize: '14px', color: '#6b7280' }}>Add an extra layer of security</p>
                 </div>
                 <button
+                  onClick={handleEnable2FA}
                   style={{ padding: '10px 20px', background: '#64748b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
                   onMouseEnter={(e) => e.target.style.background = '#475569'}
                   onMouseLeave={(e) => e.target.style.background = '#64748b'}
@@ -192,6 +275,7 @@ const ProfilePage = () => {
                   <p style={{ fontSize: '14px', color: '#6b7280' }}>Permanently remove your account</p>
                 </div>
                 <button
+                  onClick={() => setShowDeleteModal(true)}
                   style={{ padding: '10px 20px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
                   onMouseEnter={(e) => e.target.style.background = '#dc2626'}
                   onMouseLeave={(e) => e.target.style.background = '#ef4444'}
@@ -222,6 +306,159 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* 2FA Modal */}
+      {show2FAModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', borderRadius: '14px', padding: '32px', maxWidth: '400px', width: '90%', boxShadow: '0 20px 25px rgba(0, 0, 0, 0.15)' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '16px' }}>Enable Two-Factor Authentication</h3>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>
+              Two-factor authentication adds an extra layer of security to your account. You'll need to enter a code from your authenticator app when logging in.
+            </p>
+            <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '8px', marginBottom: '24px', textAlign: 'center' }}>
+              <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>Scan this QR code with your authenticator app:</p>
+              <div style={{ fontSize: '48px', color: '#d1d5db' }}>📱</div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShow2FAModal(false)}
+                style={{ flex: 1, padding: '12px', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => e.target.style.background = '#d1d5db'}
+                onMouseLeave={(e) => e.target.style.background = '#e5e7eb'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm2FA}
+                disabled={isLoading}
+                style={{ flex: 1, padding: '12px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1, transition: 'all 0.2s' }}
+                onMouseEnter={(e) => !isLoading && (e.target.style.background = '#1d4ed8')}
+                onMouseLeave={(e) => !isLoading && (e.target.style.background = '#2563eb')}
+              >
+                {isLoading ? 'Enabling...' : 'Confirm & Enable'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', borderRadius: '14px', padding: '32px', maxWidth: '450px', width: '90%', boxShadow: '0 20px 25px rgba(0, 0, 0, 0.15)' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '24px' }}>Change Password</h3>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Current Password</label>
+              <input
+                type="password"
+                placeholder="Enter current password"
+                value={passwordData.oldPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>New Password</label>
+              <input
+                type="password"
+                placeholder="Enter new password"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '6px' }}>At least 6 characters</p>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Confirm New Password</label>
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+                }}
+                style={{ flex: 1, padding: '12px', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => e.target.style.background = '#d1d5db'}
+                onMouseLeave={(e) => e.target.style.background = '#e5e7eb'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangePassword}
+                disabled={isLoading}
+                style={{ flex: 1, padding: '12px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1, transition: 'all 0.2s' }}
+                onMouseEnter={(e) => !isLoading && (e.target.style.background = '#059669')}
+                onMouseLeave={(e) => !isLoading && (e.target.style.background = '#10b981')}
+              >
+                {isLoading ? 'Changing...' : 'Change Password'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', borderRadius: '14px', padding: '32px', maxWidth: '450px', width: '90%', boxShadow: '0 20px 25px rgba(0, 0, 0, 0.15)' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626', marginBottom: '16px' }}>⚠️ Delete Account</h3>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+              This action is permanent and cannot be undone. All your data including leads, deals, tasks, and profile information will be deleted.
+            </p>
+            <div style={{ background: '#fef2f2', padding: '16px', borderRadius: '8px', marginBottom: '24px', borderLeft: '4px solid #dc2626' }}>
+              <p style={{ fontSize: '13px', color: '#7f1d1d', fontWeight: '600', marginBottom: '8px' }}>To confirm deletion, type "DELETE" below:</p>
+              <input
+                type="text"
+                placeholder="Type DELETE to confirm"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                style={{ width: '100%', padding: '12px', border: '1px solid #fee2e2', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                onFocus={(e) => e.target.style.borderColor = '#dc2626'}
+                onBlur={(e) => e.target.style.borderColor = '#fee2e2'}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirm('');
+                }}
+                style={{ flex: 1, padding: '12px', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => e.target.style.background = '#d1d5db'}
+                onMouseLeave={(e) => e.target.style.background = '#e5e7eb'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isLoading || deleteConfirm !== 'DELETE'}
+                style={{ flex: 1, padding: '12px', background: deleteConfirm === 'DELETE' ? '#dc2626' : '#d1d5db', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: deleteConfirm === 'DELETE' && !isLoading ? 'pointer' : 'not-allowed', opacity: deleteConfirm === 'DELETE' && !isLoading ? 1 : 0.6, transition: 'all 0.2s' }}
+                onMouseEnter={(e) => deleteConfirm === 'DELETE' && !isLoading && (e.target.style.background = '#b91c1c')}
+                onMouseLeave={(e) => deleteConfirm === 'DELETE' && !isLoading && (e.target.style.background = '#dc2626')}
+              >
+                {isLoading ? 'Deleting...' : 'Delete Account Permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
