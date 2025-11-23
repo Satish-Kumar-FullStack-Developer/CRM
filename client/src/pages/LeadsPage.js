@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Users, Plus, Trash2, Search, TrendingUp, ArrowUpRight, CheckCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { addLead, removeLead } from '../redux/leadSlice';
+import { fetchLeads, createLead, deleteLead } from '../redux/leadSlice';
 import { toast } from 'react-toastify';
 
 const LeadsPage = () => {
   const dispatch = useDispatch();
-  const { leads } = useSelector((state) => state.leads);
+  const { leads, isLoading } = useSelector((state) => state.leads);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -20,6 +20,11 @@ const LeadsPage = () => {
     status: 'new',
   });
 
+  useEffect(() => {
+    // Fetch leads on component mount
+    dispatch(fetchLeads());
+  }, [dispatch]);
+
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
       lead.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,34 +34,35 @@ const LeadsPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleAddLead = () => {
+  const handleAddLead = async () => {
     if (!formData.firstName || !formData.email) {
       toast.error('Please fill in required fields');
       return;
     }
-    dispatch(
-      addLead({
-        ...formData,
-        id: Date.now(),
-        score: Math.floor(Math.random() * 100),
-        createdAt: new Date().toISOString(),
-      })
-    );
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      company: '',
-      status: 'new',
-    });
-    setShowModal(false);
-    toast.success('Lead added successfully');
+    try {
+      await dispatch(createLead(formData));
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        company: '',
+        status: 'new',
+      });
+      setShowModal(false);
+      toast.success('Lead added successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add lead');
+    }
   };
 
-  const handleDeleteLead = (id) => {
-    dispatch(removeLead(id));
-    toast.success('Lead deleted');
+  const handleDeleteLead = async (id) => {
+    try {
+      await dispatch(deleteLead(id));
+      toast.success('Lead deleted');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete lead');
+    }
   };
 
   const statusBadgeStyle = (status) => {

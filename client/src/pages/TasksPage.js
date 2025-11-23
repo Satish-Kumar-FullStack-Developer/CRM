@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CheckCircle, TrendingUp, Plus, Trash2, Calendar, AlertCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { addTask, removeTask, updateTaskInList } from '../redux/taskSlice';
+import { fetchTasks, createTask, deleteTask, updateTask, completeTask } from '../redux/taskSlice';
 import { toast } from 'react-toastify';
 
 const TasksPage = () => {
   const dispatch = useDispatch();
-  const { tasks } = useSelector((state) => state.tasks);
+  const { tasks, isLoading } = useSelector((state) => state.tasks);
   const [showModal, setShowModal] = useState(false);
   const [filterPriority, setFilterPriority] = useState('all');
   const [formData, setFormData] = useState({
@@ -17,45 +17,52 @@ const TasksPage = () => {
     priority: 'medium',
   });
 
+  useEffect(() => {
+    // Fetch tasks on component mount
+    dispatch(fetchTasks());
+  }, [dispatch]);
+
   const filteredTasks = tasks.filter((task) => filterPriority === 'all' || task.priority === filterPriority);
-  const completedCount = tasks.filter((t) => t.completed).length;
+  const completedCount = tasks.filter((t) => t.status === 'Completed').length;
   const highPriorityCount = tasks.filter((t) => t.priority === 'high').length;
   const completionRate = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!formData.title) {
       toast.error('Please enter task title');
       return;
     }
-    dispatch(
-      addTask({
-        ...formData,
-        id: Date.now(),
-        completed: false,
-        createdAt: new Date().toISOString(),
-      })
-    );
-    setFormData({
-      title: '',
-      description: '',
-      dueDate: '',
-      priority: 'medium',
-    });
-    setShowModal(false);
-    toast.success('Task added successfully');
-  };
-
-  const handleCompleteTask = (id) => {
-    const task = tasks.find((t) => t.id === id);
-    if (task) {
-      dispatch(updateTaskInList({ ...task, completed: !task.completed }));
-      toast.success(task.completed ? 'Task reopened' : 'Task completed');
+    try {
+      await dispatch(createTask(formData));
+      setFormData({
+        title: '',
+        description: '',
+        dueDate: '',
+        priority: 'medium',
+      });
+      setShowModal(false);
+      toast.success('Task added successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add task');
     }
   };
 
-  const handleDeleteTask = (id) => {
-    dispatch(removeTask(id));
-    toast.success('Task deleted');
+  const handleCompleteTask = async (id) => {
+    try {
+      await dispatch(completeTask(id));
+      toast.success('Task completed');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to complete task');
+    }
+  };
+
+  const handleDeleteTask = async (id) => {
+    try {
+      await dispatch(deleteTask(id));
+      toast.success('Task deleted');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete task');
+    }
   };
 
   const getPriorityColor = (priority) => {
@@ -211,8 +218,8 @@ const TasksPage = () => {
                   >
                     <input
                       type="checkbox"
-                      checked={task.completed}
-                      onChange={() => handleCompleteTask(task.id)}
+                      checked={task.status === 'Completed'}
+                      onChange={() => handleCompleteTask(task._id)}
                       style={{
                         marginTop: '4px',
                         width: '20px',
@@ -227,8 +234,8 @@ const TasksPage = () => {
                           style={{
                             fontSize: '16px',
                             fontWeight: '600',
-                            color: task.completed ? '#9ca3af' : '#111827',
-                            textDecoration: task.completed ? 'line-through' : 'none',
+                            color: task.status === 'Completed' ? '#9ca3af' : '#111827',
+                            textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
                             margin: 0
                           }}
                         >
@@ -251,7 +258,7 @@ const TasksPage = () => {
                       )}
                     </div>
                     <button
-                      onClick={() => handleDeleteTask(task.id)}
+                      onClick={() => handleDeleteTask(task._id)}
                       style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
                       onMouseEnter={(e) => e.target.style.color = '#dc2626'}
                       onMouseLeave={(e) => e.target.style.color = '#ef4444'}

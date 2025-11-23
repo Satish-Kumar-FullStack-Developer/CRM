@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import dealService from '../services/dealService';
 
 const initialState = {
   deals: [],
@@ -36,7 +37,7 @@ const dealSlice = createSlice({
     selectDeal: (state, action) => {
       state.selectedDeal = action.payload;
     },
-    addDeal: (state, action) => {
+    addDealLocal: (state, action) => {
       state.deals.unshift(action.payload);
     },
     updateDealInList: (state, action) => {
@@ -45,11 +46,66 @@ const dealSlice = createSlice({
         state.deals[index] = action.payload;
       }
     },
-    removeDeal: (state, action) => {
+    removeDealLocal: (state, action) => {
       state.deals = state.deals.filter((d) => d._id !== action.payload);
     },
   },
 });
+
+// Async Thunk Actions
+export const fetchDeals = (params = {}) => async (dispatch) => {
+  dispatch(dealSlice.actions.fetchDealsStart());
+  try {
+    const response = await dealService.getDeals(params);
+    dispatch(dealSlice.actions.fetchDealsSuccess(response.data));
+  } catch (error) {
+    dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to fetch deals'));
+  }
+};
+
+export const fetchPipelineSummary = () => async (dispatch) => {
+  try {
+    const response = await dealService.getPipelineSummary();
+    dispatch(dealSlice.actions.setPipeline(response.data.data));
+  } catch (error) {
+    console.error('Failed to fetch pipeline summary:', error);
+  }
+};
+
+export const createDeal = (dealData) => async (dispatch) => {
+  dispatch(dealSlice.actions.fetchDealsStart());
+  try {
+    const response = await dealService.createDeal(dealData);
+    dispatch(dealSlice.actions.addDealLocal(response.data.data));
+    return response.data.data;
+  } catch (error) {
+    dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to create deal'));
+    throw error;
+  }
+};
+
+export const updateDeal = (id, dealData) => async (dispatch) => {
+  dispatch(dealSlice.actions.fetchDealsStart());
+  try {
+    const response = await dealService.updateDeal(id, dealData);
+    dispatch(dealSlice.actions.updateDealInList(response.data.data));
+    return response.data.data;
+  } catch (error) {
+    dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to update deal'));
+    throw error;
+  }
+};
+
+export const deleteDeal = (id) => async (dispatch) => {
+  dispatch(dealSlice.actions.fetchDealsStart());
+  try {
+    await dealService.deleteDeal(id);
+    dispatch(dealSlice.actions.removeDealLocal(id));
+  } catch (error) {
+    dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to delete deal'));
+    throw error;
+  }
+};
 
 export const {
   fetchDealsStart,
@@ -57,8 +113,8 @@ export const {
   fetchDealsFailure,
   setPipeline,
   selectDeal,
-  addDeal,
+  addDealLocal,
   updateDealInList,
-  removeDeal,
+  removeDealLocal,
 } = dealSlice.actions;
 export default dealSlice.reducer;

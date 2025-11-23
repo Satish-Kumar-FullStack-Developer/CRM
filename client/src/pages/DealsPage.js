@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DollarSign, CheckCircle, TrendingUp, Plus, Trash2, BarChart3 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { addDeal, removeDeal } from '../redux/dealSlice';
+import { fetchDeals, createDeal, deleteDeal } from '../redux/dealSlice';
 import { toast } from 'react-toastify';
 
 const DealsPage = () => {
   const dispatch = useDispatch();
-  const { deals } = useSelector((state) => state.deals);
+  const { deals, isLoading } = useSelector((state) => state.deals);
   const [showModal, setShowModal] = useState(false);
   const [filterStage, setFilterStage] = useState('all');
   const [formData, setFormData] = useState({
@@ -18,40 +18,49 @@ const DealsPage = () => {
     closingDate: '',
   });
 
+  useEffect(() => {
+    // Fetch deals on component mount
+    dispatch(fetchDeals());
+  }, [dispatch]);
+
   const stages = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closed'];
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const filteredDeals = deals.filter((deal) => filterStage === 'all' || deal.stage === filterStage);
   const avgDealSize = deals.length > 0 ? Math.round(totalValue / deals.length) : 0;
   const closedWon = deals.filter((d) => d.stage === 'closed').length;
 
-  const handleAddDeal = () => {
+  const handleAddDeal = async () => {
     if (!formData.title || !formData.value) {
       toast.error('Please fill in required fields');
       return;
     }
-    dispatch(
-      addDeal({
+    try {
+      await dispatch(createDeal({
         ...formData,
-        id: Date.now(),
         value: parseFloat(formData.value),
         probability: parseInt(formData.probability),
-        createdAt: new Date().toISOString(),
-      })
-    );
-    setFormData({
-      title: '',
-      value: '',
-      stage: 'prospecting',
-      probability: 25,
-      closingDate: '',
-    });
-    setShowModal(false);
-    toast.success('Deal added successfully');
+      }));
+      setFormData({
+        title: '',
+        value: '',
+        stage: 'prospecting',
+        probability: 25,
+        closingDate: '',
+      });
+      setShowModal(false);
+      toast.success('Deal added successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add deal');
+    }
   };
 
-  const handleDeleteDeal = (id) => {
-    dispatch(removeDeal(id));
-    toast.success('Deal deleted');
+  const handleDeleteDeal = async (id) => {
+    try {
+      await dispatch(deleteDeal(id));
+      toast.success('Deal deleted');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete deal');
+    }
   };
 
   const stageBadgeStyle = (stage) => {
@@ -239,7 +248,7 @@ const DealsPage = () => {
                 <tbody>
                   {filteredDeals.map((deal, index) => (
                     <tr
-                      key={deal.id}
+                      key={deal._id}
                       style={{
                         borderBottom: '1px solid #f3f4f6',
                         background: index % 2 === 0 ? 'white' : '#f9fafb',
@@ -264,7 +273,7 @@ const DealsPage = () => {
                       <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${Math.round((deal.value * deal.probability) / 100).toLocaleString()}</td>
                       <td style={{ padding: '16px 24px' }}>
                         <button
-                          onClick={() => handleDeleteDeal(deal.id)}
+                          onClick={() => handleDeleteDeal(deal._id)}
                           style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
                           onMouseEnter={(e) => e.target.style.color = '#dc2626'}
                           onMouseLeave={(e) => e.target.style.color = '#ef4444'}

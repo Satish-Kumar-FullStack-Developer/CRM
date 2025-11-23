@@ -1,12 +1,23 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Users, DollarSign, TrendingUp, CheckCircle, BarChart3, PieChart } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { fetchLeads } from '../redux/leadSlice';
+import { fetchDeals } from '../redux/dealSlice';
+import { fetchTasks } from '../redux/taskSlice';
 
 const ReportsPage = () => {
+  const dispatch = useDispatch();
   const { leads } = useSelector((state) => state.leads);
   const { deals } = useSelector((state) => state.deals);
   const { tasks } = useSelector((state) => state.tasks);
+
+  useEffect(() => {
+    // Fetch all data on component mount
+    dispatch(fetchLeads());
+    dispatch(fetchDeals());
+    dispatch(fetchTasks());
+  }, [dispatch]);
 
   const totalDealsValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const closedDealsValue = deals.filter((d) => d.stage === 'closed').reduce((sum, d) => sum + (d.value || 0), 0);
@@ -14,7 +25,7 @@ const ReportsPage = () => {
   const conversionRate = leads.length > 0 ? Math.round((qualifiedLeads / leads.length) * 100) : 0;
   const avgDealSize = deals.length > 0 ? Math.round(totalDealsValue / deals.length) : 0;
   const winRate = deals.length > 0 ? Math.round((deals.filter((d) => d.stage === 'closed').length / deals.length) * 100) : 0;
-  const completedTasks = tasks.filter((t) => t.completed).length;
+  const completedTasks = tasks.filter((t) => t.status === 'Completed').length;
 
   return (
     <>
