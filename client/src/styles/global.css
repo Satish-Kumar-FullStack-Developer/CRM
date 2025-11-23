@@ -206,12 +206,12 @@ img {
 }
 
 .show-mobile {
-  display: none;
+  display: none !important;
 }
 
 @media (max-width: 768px) {
   .show-mobile {
-    display: block;
+    display: block !important;
   }
 }
 
