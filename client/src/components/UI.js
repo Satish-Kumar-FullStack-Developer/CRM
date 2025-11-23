@@ -1,18 +1,18 @@
 import React from 'react';
 
 /**
- * Card Component - Reusable container with Tailwind CSS
+ * Card Component - Reusable container with Tailwind CSS - Responsive
  */
 const Card = ({ children, className = '', ...props }) => {
   return (
-    <div className={`rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-100 ${className}`} {...props}>
+    <div className={`rounded-xl shadow-md p-4 md:p-6 hover:shadow-lg transition-shadow border border-gray-100 ${className}`} {...props}>
       {children}
     </div>
   );
 };
 
 /**
- * Button Component - Reusable button with Tailwind CSS
+ * Button Component - Reusable button with Tailwind CSS - Responsive
  */
 const Button = ({
   children,
@@ -33,12 +33,12 @@ const Button = ({
   };
 
   const sizes = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-2 md:px-3 py-1 text-xs md:text-sm',
+    md: 'px-3 md:px-4 py-2 text-sm md:text-base',
+    lg: 'px-4 md:px-6 py-2 md:py-3 text-base md:text-lg',
   };
 
-  const baseClasses = 'font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer';
+  const baseClasses = 'font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer whitespace-nowrap';
   const variantClass = variants[variant] || variants.primary;
   const sizeClass = sizes[size] || sizes.md;
 
@@ -55,7 +55,7 @@ const Button = ({
 };
 
 /**
- * Input Component - Reusable input with Tailwind CSS
+ * Input Component - Reusable input with Tailwind CSS - Responsive
  */
 const Input = ({
   label,
@@ -64,27 +64,27 @@ const Input = ({
   ...props
 }) => {
   return (
-    <div className="mb-4">
+    <div className="mb-4 w-full">
       {label && (
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-2">
           {label}
         </label>
       )}
       <input
-        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
+        className={`w-full px-3 md:px-4 py-2 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
           error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
         } ${className}`}
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-xs md:text-sm text-red-600">{error}</p>
       )}
     </div>
   );
 };
 
 /**
- * Select Component - Reusable select with Tailwind CSS
+ * Select Component - Reusable select with Tailwind CSS - Responsive
  */
 const Select = ({ 
   label, 
@@ -94,14 +94,14 @@ const Select = ({
   ...props 
 }) => {
   return (
-    <div className="mb-4">
+    <div className="mb-4 w-full">
       {label && (
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-2">
           {label}
         </label>
       )}
       <select
-        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
+        className={`w-full px-3 md:px-4 py-2 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
           error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
         } ${className}`}
         {...props}
@@ -114,7 +114,7 @@ const Select = ({
         ))}
       </select>
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-xs md:text-sm text-red-600">{error}</p>
       )}
     </div>
   );
@@ -140,19 +140,19 @@ const Badge = ({ children, variant = 'primary', className = '' }) => {
 };
 
 /**
- * Modal Component - Reusable modal with Tailwind CSS
+ * Modal Component - Reusable modal with Tailwind CSS - Responsive
  */
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 gap-2">
+          <h2 className="text-lg md:text-xl font-bold text-gray-900 truncate">{title}</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+            className="text-gray-500 hover:text-gray-700 text-2xl leading-none flex-shrink-0"
           >
             ×
           </button>

@@ -103,30 +103,31 @@ const TasksPage = () => {
   return (
     <>
       <Navbar />
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', padding: '40px 20px' }}>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', padding: '24px 16px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           {/* Header */}
-          <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ fontSize: '42px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>Tasks</h1>
-              <p style={{ color: '#6b7280', fontSize: '16px' }}>Manage your team tasks</p>
+              <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>Tasks</h1>
+              <p style={{ color: '#6b7280', fontSize: 'clamp(14px, 3vw, 16px)' }}>Manage your team tasks</p>
             </div>
             <button
               onClick={() => setShowModal(true)}
               style={{
-                padding: '12px 24px',
+                padding: '12px 20px',
                 background: '#a855f7',
                 color: 'white',
                 border: 'none',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontWeight: '600',
                 cursor: 'pointer',
                 boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                transition: 'all 0.3s'
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.target.style.background = '#9333ea';
@@ -143,46 +144,46 @@ const TasksPage = () => {
             </button>
           </div>
 
-          {/* Stats Cards Grid - 4 columns */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '40px' }}>
+          {/* Stats Cards Grid - Responsive */}
+          <div className="grid-responsive" style={{ marginBottom: '40px' }}>
             {/* Total Tasks Card */}
-            <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', padding: '28px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #3b82f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+            <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', padding: 'clamp(16px, 4vw, 28px)', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #3b82f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e40af', marginBottom: '12px' }}>Total Tasks</div>
-                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '8px' }}>{tasks.length}</div>
+                <div style={{ fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '8px' }}>{tasks.length}</div>
                 <div style={{ fontSize: '12px', color: '#1e40af' }}>All tasks</div>
               </div>
-              <CheckCircle size={56} color="#3b82f6" strokeWidth={1.5} />
+              <CheckCircle size={56} color="#3b82f6" strokeWidth={1.5} style={{ minWidth: '40px', display: 'none' }} className="hide-mobile" />
             </div>
 
             {/* Completed Tasks Card */}
-            <div style={{ background: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)', padding: '28px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+            <div style={{ background: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)', padding: 'clamp(16px, 4vw, 28px)', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#15803d', marginBottom: '12px' }}>Completed</div>
-                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#166534', marginBottom: '8px' }}>{completedCount}</div>
+                <div style={{ fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 'bold', color: '#166534', marginBottom: '8px' }}>{completedCount}</div>
                 <div style={{ fontSize: '12px', color: '#15803d' }}>Done tasks</div>
               </div>
-              <CheckCircle size={56} color="#10b981" strokeWidth={1.5} />
+              <CheckCircle size={56} color="#10b981" strokeWidth={1.5} style={{ minWidth: '40px', display: 'none' }} className="hide-mobile" />
             </div>
 
             {/* High Priority Card */}
-            <div style={{ background: 'linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%)', padding: '28px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #a855f7', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+            <div style={{ background: 'linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%)', padding: 'clamp(16px, 4vw, 28px)', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #a855f7', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b21a8', marginBottom: '12px' }}>High Priority</div>
-                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#581c87', marginBottom: '8px' }}>{highPriorityCount}</div>
+                <div style={{ fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 'bold', color: '#581c87', marginBottom: '8px' }}>{highPriorityCount}</div>
                 <div style={{ fontSize: '12px', color: '#6b21a8' }}>Urgent tasks</div>
               </div>
-              <AlertCircle size={56} color="#a855f7" strokeWidth={1.5} />
+              <AlertCircle size={56} color="#a855f7" strokeWidth={1.5} style={{ minWidth: '40px', display: 'none' }} className="hide-mobile" />
             </div>
 
             {/* Completion Rate Card */}
-            <div style={{ background: 'linear-gradient(135deg, #fed7aa 0%, #fdba74 100%)', padding: '28px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #f97316', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+            <div style={{ background: 'linear-gradient(135deg, #fed7aa 0%, #fdba74 100%)', padding: 'clamp(16px, 4vw, 28px)', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #f97316', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#92400e', marginBottom: '12px' }}>Completion Rate</div>
-                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#78350f', marginBottom: '8px' }}>{completionRate}%</div>
+                <div style={{ fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 'bold', color: '#78350f', marginBottom: '8px' }}>{completionRate}%</div>
                 <div style={{ fontSize: '12px', color: '#92400e' }}>Overall progress</div>
               </div>
-              <TrendingUp size={56} color="#f97316" strokeWidth={1.5} />
+              <TrendingUp size={56} color="#f97316" strokeWidth={1.5} style={{ minWidth: '40px', display: 'none' }} className="hide-mobile" />
             </div>
           </div>
 
@@ -195,13 +196,14 @@ const TasksPage = () => {
                 padding: '12px 16px',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 background: 'white',
                 cursor: 'pointer',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                 transition: 'all 0.3s',
-                minWidth: '200px'
+                minWidth: '100%',
+                maxWidth: '250px'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#3b82f6';
@@ -219,85 +221,175 @@ const TasksPage = () => {
             </select>
           </div>
 
-          {/* Tasks List */}
+          {/* Tasks List - Responsive */}
           <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
             {isLoading ? (
               <LoadingSpinner size="lg" />
             ) : filteredTasks.length > 0 ? (
-              <div style={{ divideY: '1px solid #e5e7eb' }}>
-                {filteredTasks.map((task, index) => (
-                  <div
-                    key={task._id}
-                    style={{
-                      padding: '24px',
-                      borderBottom: index < filteredTasks.length - 1 ? '1px solid #e5e7eb' : 'none',
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '16px',
-                      background: index % 2 === 0 ? 'white' : '#f9fafb',
-                      transition: 'background 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={task.status === 'Completed'}
-                      onChange={() => handleCompleteTask(task._id)}
+              <>
+                {/* Desktop List View */}
+                <div className="hide-mobile" style={{ divideY: '1px solid #e5e7eb' }}>
+                  {filteredTasks.map((task, index) => (
+                    <div
+                      key={task._id}
                       style={{
-                        marginTop: '4px',
-                        width: '20px',
-                        height: '20px',
-                        cursor: 'pointer',
-                        accentColor: '#3b82f6'
+                        padding: 'clamp(16px, 4vw, 24px)',
+                        borderBottom: index < filteredTasks.length - 1 ? '1px solid #e5e7eb' : 'none',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        background: index % 2 === 0 ? 'white' : '#f9fafb',
+                        transition: 'background 0.2s'
                       }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <h3
-                          style={{
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            color: task.status === 'Completed' ? '#9ca3af' : '#111827',
-                            textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
-                            margin: 0
-                          }}
-                        >
-                          {task.title}
-                        </h3>
-                        <PriorityChip priority={task.priority} />
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={task.status === 'Completed'}
+                        onChange={() => handleCompleteTask(task._id)}
+                        style={{
+                          marginTop: '4px',
+                          width: '20px',
+                          height: '20px',
+                          cursor: 'pointer',
+                          accentColor: '#3b82f6'
+                        }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                          <h3
+                            style={{
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              color: task.status === 'Completed' ? '#9ca3af' : '#111827',
+                              textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
+                              margin: 0
+                            }}
+                          >
+                            {task.title}
+                          </h3>
+                          <PriorityChip priority={task.priority} />
+                        </div>
+                        {task.description && (
+                          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', margin: '8px 0' }}>
+                            {task.description}
+                          </p>
+                        )}
+                        {task.dueDate && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6b7280' }}>
+                            <Calendar size={14} />
+                            {new Date(task.dueDate).toLocaleDateString()}
+                          </div>
+                        )}
                       </div>
+                      <button
+                        onClick={() => handleEditTask(task._id)}
+                        style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px', flexShrink: 0 }}
+                        onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+                        onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task._id)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px', flexShrink: 0 }}
+                        onMouseEnter={(e) => e.target.style.color = '#dc2626'}
+                        onMouseLeave={(e) => e.target.style.color = '#ef4444'}
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="show-mobile" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                  {filteredTasks.map((task) => (
+                    <div
+                      key={task._id}
+                      style={{
+                        background: 'white',
+                        border: '1.5px solid #e5e7eb',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
+                        <input
+                          type="checkbox"
+                          checked={task.status === 'Completed'}
+                          onChange={() => handleCompleteTask(task._id)}
+                          style={{
+                            marginTop: '2px',
+                            width: '18px',
+                            height: '18px',
+                            cursor: 'pointer',
+                            accentColor: '#3b82f6',
+                            flexShrink: 0
+                          }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h3
+                            style={{
+                              fontSize: '15px',
+                              fontWeight: '700',
+                              color: task.status === 'Completed' ? '#9ca3af' : '#111827',
+                              textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
+                              margin: '0 0 8px 0',
+                              wordBreak: 'break-word'
+                            }}
+                          >
+                            {task.title}
+                          </h3>
+                          <PriorityChip priority={task.priority} />
+                        </div>
+                      </div>
+
                       {task.description && (
-                        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', margin: '8px 0' }}>
+                        <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '12px', margin: '0 0 12px 0' }}>
                           {task.description}
                         </p>
                       )}
+
                       {task.dueDate && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6b7280' }}>
-                          <Calendar size={14} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#6b7280', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #e5e7eb' }}>
+                          <Calendar size={13} />
                           {new Date(task.dueDate).toLocaleDateString()}
                         </div>
                       )}
+
+                      <div style={{ display: 'flex', gap: '12px', paddingTop: task.dueDate ? '0' : '12px', borderTop: task.dueDate ? 'none' : '1px solid #e5e7eb' }}>
+                        <button
+                          onClick={() => handleEditTask(task._id)}
+                          style={{ flex: 1, background: '#a855f7', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => e.target.style.background = '#9333ea'}
+                          onMouseLeave={(e) => e.target.style.background = '#a855f7'}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task._id)}
+                          style={{ flex: 1, background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => e.target.style.background = '#dc2626'}
+                          onMouseLeave={(e) => e.target.style.background = '#ef4444'}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => handleEditTask(task._id)}
-                      style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
-                      onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
-                      onMouseLeave={(e) => e.target.style.color = '#2563eb'}
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteTask(task._id)}
-                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
-                      onMouseEnter={(e) => e.target.style.color = '#dc2626'}
-                      onMouseLeave={(e) => e.target.style.color = '#ef4444'}
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div style={{ padding: '48px 24px', textAlign: 'center' }}>
                 <CheckCircle size={48} style={{ margin: '0 auto 16px', color: '#d1d5db' }} />
@@ -332,7 +424,7 @@ const TasksPage = () => {
               background: 'white',
               borderRadius: '14px',
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-              padding: '32px',
+              padding: 'clamp(20px, 5vw, 32px)',
               maxWidth: '500px',
               width: '90%',
               maxHeight: '90vh',
@@ -341,7 +433,7 @@ const TasksPage = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', marginBottom: '24px' }}>Add New Task</h2>
+            <h2 style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: 'bold', color: '#111827', marginBottom: 'clamp(16px, 4vw, 24px)' }}>Add New Task</h2>
 
             <input
               type="text"
@@ -350,10 +442,10 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -375,10 +467,10 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -402,10 +494,10 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -426,10 +518,10 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '24px',
                 background: 'white',
@@ -451,18 +543,19 @@ const TasksPage = () => {
               <option value="high">High</option>
             </select>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 onClick={handleAddOrUpdateTask}
                 disabled={isSubmitting}
                 style={{
                   flex: 1,
-                  padding: '12px 24px',
+                  minWidth: '120px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
                   background: isSubmitting ? '#d8b4fe' : '#a855f7',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontWeight: '600',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)',
@@ -489,12 +582,13 @@ const TasksPage = () => {
                 onClick={() => setShowModal(false)}
                 style={{
                   flex: 1,
-                  padding: '12px 24px',
+                  minWidth: '120px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
                   background: '#e5e7eb',
                   color: '#374151',
                   border: 'none',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.3s'

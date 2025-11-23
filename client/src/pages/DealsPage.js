@@ -140,7 +140,7 @@ const DealsPage = () => {
           </div>
 
           {/* Stats Cards Grid - 4 columns */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '40px' }}>
+          <div className="grid-responsive" style={{ marginBottom: '40px' }}>
             {/* Total Deals Card */}
             <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', padding: '28px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #3b82f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -218,7 +218,7 @@ const DealsPage = () => {
           </div>
 
           {/* Deal Stages Breakdown */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
             {stages.map((stage) => {
               const stageDeals = deals.filter((d) => d.stage === stage);
               const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
@@ -252,70 +252,145 @@ const DealsPage = () => {
             })}
           </div>
 
-          {/* Deals Table */}
-          <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
+          {/* Deals Table - Responsive */}
+          <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
             {isLoading ? (
               <LoadingSpinner size="lg" />
             ) : filteredDeals.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f9fafb', borderBottom: '1.5px solid #e5e7eb' }}>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Title</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Value</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Stage</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Probability</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expected Value</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredDeals.map((deal, index) => (
-                    <tr
+              <>
+                {/* Desktop Table */}
+                <div className="hide-mobile" style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                    <thead>
+                      <tr style={{ background: '#f9fafb', borderBottom: '1.5px solid #e5e7eb' }}>
+                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Title</th>
+                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Value</th>
+                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Stage</th>
+                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Probability</th>
+                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expected Value</th>
+                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredDeals.map((deal, index) => (
+                        <tr
+                          key={deal._id}
+                          style={{
+                            borderBottom: '1px solid #f3f4f6',
+                            background: index % 2 === 0 ? 'white' : '#f9fafb',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
+                        >
+                          <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>{deal.title}</td>
+                          <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${deal.value?.toLocaleString()}</td>
+                          <td style={{ padding: '16px 24px' }}>
+                            <StatusChip status={deal.stage} type="deal" />
+                          </td>
+                          <td style={{ padding: '16px 24px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '100%', minWidth: '60px', background: '#e5e7eb', borderRadius: '9999px', height: '6px', overflow: 'hidden' }}>
+                                <div style={{ background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)', height: '100%', borderRadius: '9999px', width: `${deal.probability}%` }} />
+                              </div>
+                              <span style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>{deal.probability}%</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${Math.round((deal.value * deal.probability) / 100).toLocaleString()}</td>
+                          <td style={{ padding: '16px 24px' }}>
+                            <button
+                              onClick={() => handleEditDeal(deal._id)}
+                              style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                              onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+                              onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDeal(deal._id)}
+                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                              onMouseEnter={(e) => e.target.style.color = '#dc2626'}
+                              onMouseLeave={(e) => e.target.style.color = '#ef4444'}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="show-mobile" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                  {filteredDeals.map((deal) => (
+                    <div
                       key={deal._id}
                       style={{
-                        borderBottom: '1px solid #f3f4f6',
-                        background: index % 2 === 0 ? 'white' : '#f9fafb',
-                        transition: 'background 0.2s'
+                        background: 'white',
+                        border: '1.5px solid #e5e7eb',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        transition: 'all 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
                     >
-                      <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>{deal.title}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${deal.value?.toLocaleString()}</td>
-                      <td style={{ padding: '16px 24px' }}>
-                        <StatusChip status={deal.stage} type="deal" />
-                      </td>
-                      <td style={{ padding: '16px 24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '100%', minWidth: '60px', background: '#e5e7eb', borderRadius: '9999px', height: '6px', overflow: 'hidden' }}>
-                            <div style={{ background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)', height: '100%', borderRadius: '9999px', width: `${deal.probability}%` }} />
-                          </div>
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>{deal.probability}%</span>
+                      <div style={{ marginBottom: '12px' }}>
+                        <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Title</p>
+                        <p style={{ fontSize: '16px', fontWeight: '700', color: '#111827', marginBottom: '12px' }}>{deal.title}</p>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Value</p>
+                          <p style={{ fontSize: '15px', fontWeight: '700', color: '#111827' }}>${deal.value?.toLocaleString()}</p>
                         </div>
-                      </td>
-                      <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${Math.round((deal.value * deal.probability) / 100).toLocaleString()}</td>
-                      <td style={{ padding: '16px 24px' }}>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Stage</p>
+                          <StatusChip status={deal.stage} type="deal" />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Probability</p>
+                          <p style={{ fontSize: '15px', fontWeight: '700', color: '#111827' }}>{deal.probability}%</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Expected Value</p>
+                          <p style={{ fontSize: '15px', fontWeight: '700', color: '#111827' }}>${Math.round((deal.value * deal.probability) / 100).toLocaleString()}</p>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
                         <button
                           onClick={() => handleEditDeal(deal._id)}
-                          style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
-                          onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
-                          onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                          style={{ flex: 1, background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => e.target.style.background = '#1d4ed8'}
+                          onMouseLeave={(e) => e.target.style.background = '#2563eb'}
                         >
-                          <Edit2 size={18} />
+                          Edit
                         </button>
                         <button
                           onClick={() => handleDeleteDeal(deal._id)}
-                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
-                          onMouseEnter={(e) => e.target.style.color = '#dc2626'}
-                          onMouseLeave={(e) => e.target.style.color = '#ef4444'}
+                          style={{ flex: 1, background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => e.target.style.background = '#dc2626'}
+                          onMouseLeave={(e) => e.target.style.background = '#ef4444'}
                         >
-                          <Trash2 size={18} />
+                          Delete
                         </button>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </>
             ) : (
               <div style={{ padding: '48px 24px', textAlign: 'center' }}>
                 <DollarSign size={48} style={{ margin: '0 auto 16px', color: '#d1d5db' }} />
@@ -350,7 +425,7 @@ const DealsPage = () => {
               background: 'white',
               borderRadius: '14px',
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-              padding: '32px',
+              padding: 'clamp(20px, 5vw, 32px)',
               maxWidth: '500px',
               width: '90%',
               maxHeight: '90vh',
@@ -359,7 +434,7 @@ const DealsPage = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', marginBottom: '24px' }}>Add New Deal</h2>
+            <h2 style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: 'bold', color: '#111827', marginBottom: 'clamp(16px, 4vw, 24px)' }}>Add New Deal</h2>
 
             <input
               type="text"
@@ -368,10 +443,10 @@ const DealsPage = () => {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -394,10 +469,10 @@ const DealsPage = () => {
               onChange={(e) => setFormData({ ...formData, value: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -418,10 +493,10 @@ const DealsPage = () => {
               onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 background: 'white',
@@ -446,7 +521,7 @@ const DealsPage = () => {
             </select>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: 'clamp(12px, 2vw, 14px)', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
                 Probability: {formData.probability}%
               </label>
               <input
@@ -473,10 +548,10 @@ const DealsPage = () => {
               onChange={(e) => setFormData({ ...formData, closingDate: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '24px',
                 boxSizing: 'border-box',
@@ -492,18 +567,19 @@ const DealsPage = () => {
               }}
             />
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 onClick={handleAddOrUpdateDeal}
                 disabled={isSubmitting}
                 style={{
                   flex: 1,
-                  padding: '12px 24px',
+                  minWidth: '120px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
                   background: isSubmitting ? '#bbf7d0' : '#16a34a',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontWeight: '600',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
@@ -530,12 +606,13 @@ const DealsPage = () => {
                 onClick={() => setShowModal(false)}
                 style={{
                   flex: 1,
-                  padding: '12px 24px',
+                  minWidth: '120px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
                   background: '#e5e7eb',
                   color: '#374151',
                   border: 'none',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.3s'

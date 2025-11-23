@@ -103,3 +103,125 @@ select {
 ::-webkit-scrollbar-thumb:hover {
   background: #bfdbfe;
 }
+
+/* Responsive Typography */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Container queries and responsive layouts */
+@media (max-width: 1024px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+    padding: 0;
+  }
+}
+
+/* Utility responsive classes */
+.responsive-padding {
+  padding: var(--spacing-2xl);
+}
+
+@media (max-width: 1024px) {
+  .responsive-padding {
+    padding: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-padding {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-padding {
+    padding: var(--spacing-md);
+  }
+}
+
+.responsive-gap {
+  gap: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .responsive-gap {
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-gap {
+    gap: var(--spacing-md);
+  }
+}
+
+/* Responsive grid columns */
+.grid-responsive {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1200px) {
+  .grid-responsive {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hide elements responsively */
+.hide-mobile {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .show-mobile {
+    display: block;
+  }
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  table {
+    font-size: 13px;
+  }
+  
+  th, td {
+    padding: 8px 4px !important;
+  }
+}

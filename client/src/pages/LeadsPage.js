@@ -134,30 +134,31 @@ const LeadsPage = () => {
   return (
     <>
       <Navbar />
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', padding: '40px 20px' }}>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', padding: '24px 16px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           {/* Header */}
-          <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ fontSize: '42px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>Leads</h1>
-              <p style={{ color: '#6b7280', fontSize: '16px' }}>Manage and track your leads</p>
+              <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>Leads</h1>
+              <p style={{ color: '#6b7280', fontSize: 'clamp(14px, 3vw, 16px)' }}>Manage and track your leads</p>
             </div>
             <button
               onClick={() => setShowModal(true)}
               style={{
-                padding: '12px 24px',
+                padding: '12px 20px',
                 background: '#2563eb',
                 color: 'white',
                 border: 'none',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontWeight: '600',
                 cursor: 'pointer',
                 boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                transition: 'all 0.3s'
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.target.style.background = '#1d4ed8';
@@ -174,8 +175,8 @@ const LeadsPage = () => {
             </button>
           </div>
 
-          {/* Stats Cards Grid - 4 columns */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '40px' }}>
+          {/* Stats Cards Grid - Responsive */}
+          <div className="grid-responsive" style={{ marginBottom: '40px' }}>
             {/* Total Leads Card */}
             <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', padding: '28px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderLeft: '5px solid #3b82f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -217,8 +218,8 @@ const LeadsPage = () => {
             </div>
           </div>
 
-          {/* Filters */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          {/* Filters - Responsive */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
             {/* Search Input */}
             <div style={{ position: 'relative' }}>
               <input
@@ -281,70 +282,144 @@ const LeadsPage = () => {
             </select>
           </div>
 
-          {/* Leads Table */}
+          {/* Leads Table - Responsive */}
           <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
             {isLoading ? (
               <LoadingSpinner size="lg" />
             ) : filteredLeads.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f9fafb', borderBottom: '1.5px solid #e5e7eb' }}>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Name</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Company</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Score</th>
-                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredLeads.map((lead, index) => (
-                    <tr
+              <>
+                {/* Desktop Table */}
+                <div className="hide-mobile" style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
+                    <thead>
+                      <tr style={{ background: '#f9fafb', borderBottom: '1.5px solid #e5e7eb' }}>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Name</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Company</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Score</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLeads.map((lead, index) => (
+                        <tr
+                          key={lead._id}
+                          style={{
+                            borderBottom: '1px solid #f3f4f6',
+                            background: index % 2 === 0 ? 'white' : '#f9fafb',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
+                        >
+                          <td style={{ padding: '12px 16px', fontSize: '13px', fontWeight: '600', color: '#111827' }}>{lead.firstName} {lead.lastName}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '13px', color: '#6b7280', wordBreak: 'break-word' }}>{lead.email}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '13px', color: '#6b7280' }}>{lead.company || '-'}</td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <StatusChip status={lead.status} type="lead" />
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '100%', minWidth: '50px', background: '#e5e7eb', borderRadius: '9999px', height: '6px', overflow: 'hidden' }}>
+                                <div style={{ background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)', height: '100%', borderRadius: '9999px', width: `${lead.score}%` }} />
+                              </div>
+                              <span style={{ fontSize: '12px', fontWeight: '600', color: '#374151', minWidth: '30px' }}>{lead.score}%</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <button
+                              onClick={() => handleEditLead(lead._id)}
+                              style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                              onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+                              onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLead(lead._id)}
+                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                              onMouseEnter={(e) => e.target.style.color = '#dc2626'}
+                              onMouseLeave={(e) => e.target.style.color = '#ef4444'}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="show-mobile" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                  {filteredLeads.map((lead) => (
+                    <div
                       key={lead._id}
                       style={{
-                        borderBottom: '1px solid #f3f4f6',
-                        background: index % 2 === 0 ? 'white' : '#f9fafb',
-                        transition: 'background 0.2s'
+                        background: 'white',
+                        border: '1.5px solid #e5e7eb',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        transition: 'all 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
                     >
-                      <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>{lead.firstName} {lead.lastName}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '15px', color: '#6b7280' }}>{lead.email}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '15px', color: '#6b7280' }}>{lead.company || '-'}</td>
-                      <td style={{ padding: '16px 24px' }}>
-                        <StatusChip status={lead.status} type="lead" />
-                      </td>
-                      <td style={{ padding: '16px 24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '100%', minWidth: '60px', background: '#e5e7eb', borderRadius: '9999px', height: '6px', overflow: 'hidden' }}>
-                            <div style={{ background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)', height: '100%', borderRadius: '9999px', width: `${lead.score}%` }} />
-                          </div>
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>{lead.score}%</span>
+                      <div style={{ marginBottom: '12px' }}>
+                        <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Name</p>
+                        <p style={{ fontSize: '16px', fontWeight: '700', color: '#111827', marginBottom: '12px' }}>{lead.firstName} {lead.lastName}</p>
+                      </div>
+
+                      <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #e5e7eb' }}>
+                        <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Email</p>
+                        <p style={{ fontSize: '14px', color: '#111827', wordBreak: 'break-word' }}>{lead.email}</p>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Company</p>
+                          <p style={{ fontSize: '14px', color: '#111827' }}>{lead.company || '-'}</p>
                         </div>
-                      </td>
-                      <td style={{ padding: '16px 24px' }}>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Status</p>
+                          <StatusChip status={lead.status} type="lead" />
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: '12px' }}>
+                        <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '4px' }}>Score</p>
+                        <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>{lead.score}%</p>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
                         <button
                           onClick={() => handleEditLead(lead._id)}
-                          style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
-                          onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
-                          onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                          style={{ flex: 1, background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => e.target.style.background = '#1d4ed8'}
+                          onMouseLeave={(e) => e.target.style.background = '#2563eb'}
                         >
-                          <Edit2 size={18} />
+                          Edit
                         </button>
                         <button
                           onClick={() => handleDeleteLead(lead._id)}
-                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
-                          onMouseEnter={(e) => e.target.style.color = '#dc2626'}
-                          onMouseLeave={(e) => e.target.style.color = '#ef4444'}
+                          style={{ flex: 1, background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => e.target.style.background = '#dc2626'}
+                          onMouseLeave={(e) => e.target.style.background = '#ef4444'}
                         >
-                          <Trash2 size={18} />
+                          Delete
                         </button>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </>
             ) : (
               <div style={{ padding: '48px 24px', textAlign: 'center' }}>
                 <Users size={48} style={{ margin: '0 auto 16px', color: '#d1d5db' }} />
@@ -379,7 +454,7 @@ const LeadsPage = () => {
               background: 'white',
               borderRadius: '14px',
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-              padding: '32px',
+              padding: 'clamp(20px, 5vw, 32px)',
               maxWidth: '500px',
               width: '90%',
               maxHeight: '90vh',
@@ -388,19 +463,19 @@ const LeadsPage = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', marginBottom: '24px' }}>Add New Lead</h2>
+            <h2 style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: 'bold', color: '#111827', marginBottom: 'clamp(16px, 4vw, 24px)' }}>Add New Lead</h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '16px' }}>
               <input
                 type="text"
                 placeholder="First Name"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 style={{
-                  padding: '12px 16px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                   border: '1.5px solid #e5e7eb',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontFamily: 'inherit',
                   boxSizing: 'border-box',
                   transition: 'all 0.3s'
@@ -420,10 +495,10 @@ const LeadsPage = () => {
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 style={{
-                  padding: '12px 16px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                   border: '1.5px solid #e5e7eb',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontFamily: 'inherit',
                   boxSizing: 'border-box',
                   transition: 'all 0.3s'
@@ -446,10 +521,10 @@ const LeadsPage = () => {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -472,10 +547,10 @@ const LeadsPage = () => {
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -498,10 +573,10 @@ const LeadsPage = () => {
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '16px',
                 boxSizing: 'border-box',
@@ -522,10 +597,10 @@ const LeadsPage = () => {
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: 'clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 border: '1.5px solid #e5e7eb',
                 borderRadius: '10px',
-                fontSize: '15px',
+                fontSize: 'clamp(13px, 2vw, 15px)',
                 fontFamily: 'inherit',
                 marginBottom: '24px',
                 background: 'white',
@@ -548,18 +623,19 @@ const LeadsPage = () => {
               <option value="lost">Lost</option>
             </select>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 onClick={handleAddOrUpdateLead}
                 disabled={isSubmitting}
                 style={{
                   flex: 1,
-                  padding: '12px 24px',
+                  minWidth: '120px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
                   background: isSubmitting ? '#93c5fd' : '#2563eb',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontWeight: '600',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
@@ -586,12 +662,13 @@ const LeadsPage = () => {
                 onClick={() => setShowModal(false)}
                 style={{
                   flex: 1,
-                  padding: '12px 24px',
+                  minWidth: '120px',
+                  padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
                   background: '#e5e7eb',
                   color: '#374151',
                   border: 'none',
                   borderRadius: '10px',
-                  fontSize: '15px',
+                  fontSize: 'clamp(13px, 2vw, 15px)',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.3s'
