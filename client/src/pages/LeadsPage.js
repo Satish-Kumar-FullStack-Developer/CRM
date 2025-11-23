@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Users, Plus, Trash2, Search, TrendingUp, ArrowUpRight, CheckCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchLeads, createLead, deleteLead } from '../redux/leadSlice';
+import { StatusChip } from '../utils/statusColors';
 import { toast } from 'react-toastify';
 
 const LeadsPage = () => {
@@ -93,20 +95,6 @@ const LeadsPage = () => {
       toast.success('Lead deleted');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete lead');
-    }
-  };
-
-  const statusBadgeStyle = (status) => {
-    const baseStyle = { display: 'inline-block', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' };
-    switch (status) {
-      case 'qualified':
-        return { ...baseStyle, background: '#dcfce7', color: '#15803d' };
-      case 'contacted':
-        return { ...baseStyle, background: '#dbeafe', color: '#1e40af' };
-      case 'lost':
-        return { ...baseStyle, background: '#fee2e2', color: '#7f1d1d' };
-      default:
-        return { ...baseStyle, background: '#f3f4f6', color: '#374151' };
     }
   };
 
@@ -267,7 +255,9 @@ const LeadsPage = () => {
 
           {/* Leads Table */}
           <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
-            {filteredLeads.length > 0 ? (
+            {isLoading ? (
+              <LoadingSpinner size="lg" />
+            ) : filteredLeads.length > 0 ? (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb', borderBottom: '1.5px solid #e5e7eb' }}>
@@ -295,7 +285,7 @@ const LeadsPage = () => {
                       <td style={{ padding: '16px 24px', fontSize: '15px', color: '#6b7280' }}>{lead.email}</td>
                       <td style={{ padding: '16px 24px', fontSize: '15px', color: '#6b7280' }}>{lead.company || '-'}</td>
                       <td style={{ padding: '16px 24px' }}>
-                        <div style={statusBadgeStyle(lead.status)}>{lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}</div>
+                        <StatusChip status={lead.status} type="lead" />
                       </td>
                       <td style={{ padding: '16px 24px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

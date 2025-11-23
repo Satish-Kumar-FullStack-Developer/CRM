@@ -30,6 +30,9 @@ const leadSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
+    clearLoading: (state) => {
+      state.isLoading = false;
+    },
     selectLead: (state, action) => {
       state.selectedLead = action.payload;
     },
@@ -64,6 +67,7 @@ export const createLead = (leadData) => async (dispatch) => {
   try {
     const response = await leadService.createLead(leadData);
     dispatch(leadSlice.actions.addLeadLocal(response.data.data));
+    dispatch(leadSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(leadSlice.actions.fetchLeadsFailure(error.response?.data?.message || 'Failed to create lead'));
@@ -76,6 +80,7 @@ export const updateLead = (id, leadData) => async (dispatch) => {
   try {
     const response = await leadService.updateLead(id, leadData);
     dispatch(leadSlice.actions.updateLeadInList(response.data.data));
+    dispatch(leadSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(leadSlice.actions.fetchLeadsFailure(error.response?.data?.message || 'Failed to update lead'));
@@ -88,6 +93,7 @@ export const deleteLead = (id) => async (dispatch) => {
   try {
     await leadService.deleteLead(id);
     dispatch(leadSlice.actions.removeLeadLocal(id));
+    dispatch(leadSlice.actions.clearLoading());
   } catch (error) {
     dispatch(leadSlice.actions.fetchLeadsFailure(error.response?.data?.message || 'Failed to delete lead'));
     throw error;
@@ -98,6 +104,7 @@ export const {
   fetchLeadsStart,
   fetchLeadsSuccess,
   fetchLeadsFailure,
+  clearLoading,
   selectLead,
   addLeadLocal,
   updateLeadInList,

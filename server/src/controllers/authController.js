@@ -24,7 +24,7 @@ class AuthController {
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
-      const result = await authService.login(email, password);
+      const result = await authService.login(email.toLowerCase(), password);
       res.json(result);
     } catch (error) {
       logger.error('Login error:', error);
@@ -103,7 +103,7 @@ class AuthController {
   async forgotPassword(req, res, next) {
     try {
       const { email } = req.body;
-      await authService.sendPasswordResetEmail(email);
+      await authService.sendPasswordResetEmail(email.toLowerCase());
       res.json({
         success: true,
         message: 'Password reset link sent to your email',
@@ -120,10 +120,10 @@ class AuthController {
   async resetPassword(req, res, next) {
     try {
       const { token, newPassword } = req.body;
-      await authService.resetPassword(token, newPassword);
+      await authService.resetPasswordWithToken(token, newPassword);
       res.json({
         success: true,
-        message: 'Password reset successfully',
+        message: 'Password reset successfully. You can now login with your new password.',
       });
     } catch (error) {
       logger.error('Reset password error:', error);

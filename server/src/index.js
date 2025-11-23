@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { connectDB } = require('./config/database');
+const { initializeRoles } = require('./config/initRoles');
 const config = require('./config/config');
 const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -34,6 +35,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Connect to database
 connectDB();
+
+// Initialize roles after database connection
+initializeRoles();
 
 // Health check
 app.get('/health', (req, res) => {

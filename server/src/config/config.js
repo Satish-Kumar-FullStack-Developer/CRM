@@ -9,6 +9,7 @@ module.exports = {
   BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '10'),
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',

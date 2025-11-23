@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DollarSign, CheckCircle, TrendingUp, Plus, Trash2, BarChart3 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchDeals, createDeal, deleteDeal } from '../redux/dealSlice';
+import { StatusChip } from '../utils/statusColors';
 import { toast } from 'react-toastify';
 
 const DealsPage = () => {
@@ -61,18 +63,6 @@ const DealsPage = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete deal');
     }
-  };
-
-  const stageBadgeStyle = (stage) => {
-    const baseStyle = { display: 'inline-block', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' };
-    const stages = {
-      prospecting: { background: '#dbeafe', color: '#1e40af' },
-      qualification: { background: '#dcfce7', color: '#15803d' },
-      proposal: { background: '#e9d5ff', color: '#6b21a8' },
-      negotiation: { background: '#fed7aa', color: '#92400e' },
-      closed: { background: '#cffafe', color: '#164e63' },
-    };
-    return { ...baseStyle, ...stages[stage] };
   };
 
   return (
@@ -233,7 +223,9 @@ const DealsPage = () => {
 
           {/* Deals Table */}
           <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
-            {filteredDeals.length > 0 ? (
+            {isLoading ? (
+              <LoadingSpinner size="lg" />
+            ) : filteredDeals.length > 0 ? (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb', borderBottom: '1.5px solid #e5e7eb' }}>
@@ -260,7 +252,7 @@ const DealsPage = () => {
                       <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>{deal.title}</td>
                       <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${deal.value?.toLocaleString()}</td>
                       <td style={{ padding: '16px 24px' }}>
-                        <div style={stageBadgeStyle(deal.stage)}>{deal.stage.charAt(0).toUpperCase() + deal.stage.slice(1)}</div>
+                        <StatusChip status={deal.stage} type="deal" />
                       </td>
                       <td style={{ padding: '16px 24px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

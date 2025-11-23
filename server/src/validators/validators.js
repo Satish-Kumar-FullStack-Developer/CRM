@@ -26,6 +26,19 @@ const changePasswordValidator = {
   }),
 };
 
+const forgotPasswordValidator = {
+  body: Joi.object({
+    email: Joi.string().email().required(),
+  }),
+};
+
+const resetPasswordValidator = {
+  body: Joi.object({
+    token: Joi.string().required(),
+    newPassword: Joi.string().min(6).max(50).required(),
+  }),
+};
+
 // Lead Validators
 const createLeadValidator = {
   body: Joi.object({
@@ -90,6 +103,8 @@ module.exports = {
   registerValidator,
   loginValidator,
   changePasswordValidator,
+  forgotPasswordValidator,
+  resetPasswordValidator,
   createLeadValidator,
   updateLeadValidator,
   createDealValidator,

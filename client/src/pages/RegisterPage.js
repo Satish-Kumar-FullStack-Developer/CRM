@@ -33,6 +33,24 @@ const RegisterPage = () => {
 
   return (
     <div style={styles.container}>
+      <style>{`
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(20px); }
+          100% { transform: translateY(0px); }
+        }
+      `}</style>
+      
+      {/* Background Pattern Layers */}
+      <div style={styles.containerBefore}></div>
+      <div style={styles.containerAfter}></div>
+
+      {/* Register Card */}
       <Card style={styles.card}>
         <h1 style={styles.title}>Create Account</h1>
         <p style={styles.subtitle}>Join CRM System</p>
@@ -125,33 +143,72 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    backgroundColor: '#f3f4f6',
-    padding: '1rem',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
+    backgroundSize: '400% 400%',
+    animation: 'gradient 15s ease infinite',
+    position: 'relative',
+    overflow: 'hidden',
+    padding: '20px',
+  },
+  containerBefore: {
+    position: 'absolute',
+    top: '-50%',
+    right: '-50%',
+    width: '200%',
+    height: '200%',
+    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+    backgroundSize: '50px 50px',
+    animation: 'float 20s linear infinite',
+  },
+  containerAfter: {
+    position: 'absolute',
+    bottom: '-50%',
+    left: '-50%',
+    width: '200%',
+    height: '200%',
+    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
+    backgroundSize: '80px 80px',
+    animation: 'float 25s linear infinite reverse',
   },
   card: {
     width: '100%',
     maxWidth: '500px',
-    padding: '2rem',
+    padding: '2.5rem',
+    position: 'relative',
+    zIndex: 10,
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    borderRadius: '16px',
+    background: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(10px)',
   },
   title: {
     textAlign: 'center',
     marginBottom: '0.5rem',
-    color: '#1f2937',
+    fontSize: '32px',
+    fontWeight: 'bold',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
   },
   subtitle: {
     textAlign: 'center',
     color: '#6b7280',
     marginBottom: '2rem',
+    fontSize: '14px',
   },
   footer: {
     textAlign: 'center',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     color: '#6b7280',
+    fontSize: '14px',
   },
   link: {
-    color: '#3b82f6',
+    color: '#667eea',
     textDecoration: 'none',
     fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'color 0.2s',
   },
 };
 

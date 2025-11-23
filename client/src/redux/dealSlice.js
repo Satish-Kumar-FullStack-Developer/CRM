@@ -31,6 +31,9 @@ const dealSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
+    clearLoading: (state) => {
+      state.isLoading = false;
+    },
     setPipeline: (state, action) => {
       state.pipeline = action.payload;
     },
@@ -77,6 +80,7 @@ export const createDeal = (dealData) => async (dispatch) => {
   try {
     const response = await dealService.createDeal(dealData);
     dispatch(dealSlice.actions.addDealLocal(response.data.data));
+    dispatch(dealSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to create deal'));
@@ -89,6 +93,7 @@ export const updateDeal = (id, dealData) => async (dispatch) => {
   try {
     const response = await dealService.updateDeal(id, dealData);
     dispatch(dealSlice.actions.updateDealInList(response.data.data));
+    dispatch(dealSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to update deal'));
@@ -101,6 +106,7 @@ export const deleteDeal = (id) => async (dispatch) => {
   try {
     await dealService.deleteDeal(id);
     dispatch(dealSlice.actions.removeDealLocal(id));
+    dispatch(dealSlice.actions.clearLoading());
   } catch (error) {
     dispatch(dealSlice.actions.fetchDealsFailure(error.response?.data?.message || 'Failed to delete deal'));
     throw error;
@@ -111,6 +117,7 @@ export const {
   fetchDealsStart,
   fetchDealsSuccess,
   fetchDealsFailure,
+  clearLoading,
   setPipeline,
   selectDeal,
   addDealLocal,

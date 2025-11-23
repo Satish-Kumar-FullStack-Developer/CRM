@@ -10,6 +10,7 @@ import PrivateRoute from './components/PrivateRoute';
 // Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import Dashboard from './pages/Dashboard';
 import LeadsPage from './pages/LeadsPage';
 import DealsPage from './pages/DealsPage';
@@ -27,6 +28,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/leads" element={<PrivateRoute><LeadsPage /></PrivateRoute>} />
           <Route path="/deals" element={<PrivateRoute><DealsPage /></PrivateRoute>} />

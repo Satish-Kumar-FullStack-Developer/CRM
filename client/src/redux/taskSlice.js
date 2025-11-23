@@ -30,6 +30,9 @@ const taskSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
+    clearLoading: (state) => {
+      state.isLoading = false;
+    },
     selectTask: (state, action) => {
       state.selectedTask = action.payload;
     },
@@ -64,6 +67,7 @@ export const createTask = (taskData) => async (dispatch) => {
   try {
     const response = await taskService.createTask(taskData);
     dispatch(taskSlice.actions.addTaskLocal(response.data.data));
+    dispatch(taskSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(taskSlice.actions.fetchTasksFailure(error.response?.data?.message || 'Failed to create task'));
@@ -76,6 +80,7 @@ export const updateTask = (id, taskData) => async (dispatch) => {
   try {
     const response = await taskService.updateTask(id, taskData);
     dispatch(taskSlice.actions.updateTaskInList(response.data.data));
+    dispatch(taskSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(taskSlice.actions.fetchTasksFailure(error.response?.data?.message || 'Failed to update task'));
@@ -88,6 +93,7 @@ export const completeTask = (id) => async (dispatch) => {
   try {
     const response = await taskService.completeTask(id);
     dispatch(taskSlice.actions.updateTaskInList(response.data.data));
+    dispatch(taskSlice.actions.clearLoading());
     return response.data.data;
   } catch (error) {
     dispatch(taskSlice.actions.fetchTasksFailure(error.response?.data?.message || 'Failed to complete task'));
@@ -100,6 +106,7 @@ export const deleteTask = (id) => async (dispatch) => {
   try {
     await taskService.deleteTask(id);
     dispatch(taskSlice.actions.removeTaskLocal(id));
+    dispatch(taskSlice.actions.clearLoading());
   } catch (error) {
     dispatch(taskSlice.actions.fetchTasksFailure(error.response?.data?.message || 'Failed to delete task'));
     throw error;
@@ -110,6 +117,7 @@ export const {
   fetchTasksStart,
   fetchTasksSuccess,
   fetchTasksFailure,
+  clearLoading,
   selectTask,
   addTaskLocal,
   updateTaskInList,

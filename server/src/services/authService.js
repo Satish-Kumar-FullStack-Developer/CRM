@@ -198,7 +198,7 @@ class AuthService {
   }
 
   /**
-   * Send password reset email
+   * Send password reset email with token-based link
    * @param {string} email - User email
    */
   async sendPasswordResetEmail(email) {
@@ -210,19 +210,32 @@ class AuthService {
         return { success: true };
       }
 
-      // Generate reset token (valid for 1 hour)
+      // Generate unique reset token (32 characters)
       const crypto = require('crypto');
-      const resetToken = crypto.randomBytes(32).toString('hex');
-      const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+      const resetToken = crypto.randomBytes(16).toString('hex');
       
+      // Hash token for storage
+      const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+      // Set token to expire in 1 hour
       user.resetToken = resetTokenHash;
-      user.resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      user.resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
       await user.save();
 
-      // In production, send email here with reset link
-      // For now, just log it
-      logger.info(`Password reset email sent to: ${email}`);
-      logger.info(`Reset token (for testing): ${resetToken}`);
+      logger.info(`Password reset token generated for ${email}, expires at ${user.resetTokenExpires}`);
+
+      // Send email with reset link
+      const emailService = require('./emailService');
+      
+      try {
+        // Use the plain token in the link (not the hash)
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+        await emailService.sendPasswordResetEmail(email, resetLink);
+        logger.info(`Password reset email sent to: ${email}`);
+      } catch (emailError) {
+        logger.warn(`Failed to send password reset email to ${email}:`, emailError.message);
+        // Still return success - token was created even if email failed
+      }
 
       return { success: true };
     } catch (error) {
@@ -232,11 +245,11 @@ class AuthService {
   }
 
   /**
-   * Reset password with token
-   * @param {string} token - Reset token
+   * Reset password using token
+   * @param {string} token - Reset token from email
    * @param {string} newPassword - New password
    */
-  async resetPassword(token, newPassword) {
+  async resetPasswordWithToken(token, newPassword) {
     try {
       const crypto = require('crypto');
       const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -247,15 +260,17 @@ class AuthService {
       });
 
       if (!user) {
-        throw new Error('Invalid or expired reset token');
+        throw new Error('Invalid or expired password reset token');
       }
 
+      // Update password
       user.password = newPassword;
       user.resetToken = undefined;
       user.resetTokenExpires = undefined;
+      user.lastPasswordReset = new Date();
       await user.save();
 
-      logger.info(`Password reset for user: ${user.email}`);
+      logger.info(`Password reset successfully for user: ${user.email}`);
       return { success: true };
     } catch (error) {
       logger.error('Reset password error:', error);

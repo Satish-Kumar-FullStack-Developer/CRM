@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CheckCircle, TrendingUp, Plus, Trash2, Calendar, AlertCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchTasks, createTask, deleteTask, updateTask, completeTask } from '../redux/taskSlice';
+import { StatusChip, PriorityChip } from '../utils/statusColors';
 import { toast } from 'react-toastify';
 
 const TasksPage = () => {
@@ -62,19 +64,6 @@ const TasksPage = () => {
       toast.success('Task deleted');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete task');
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high':
-        return { background: '#fee2e2', color: '#7f1d1d' };
-      case 'medium':
-        return { background: '#fed7aa', color: '#92400e' };
-      case 'low':
-        return { background: '#dcfce7', color: '#15803d' };
-      default:
-        return { background: '#f3f4f6', color: '#374151' };
     }
   };
 
@@ -199,7 +188,9 @@ const TasksPage = () => {
 
           {/* Tasks List */}
           <div style={{ background: 'white', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
-            {filteredTasks.length > 0 ? (
+            {isLoading ? (
+              <LoadingSpinner size="lg" />
+            ) : filteredTasks.length > 0 ? (
               <div style={{ divideY: '1px solid #e5e7eb' }}>
                 {filteredTasks.map((task, index) => (
                   <div
@@ -241,9 +232,7 @@ const TasksPage = () => {
                         >
                           {task.title}
                         </h3>
-                        <div style={{ ...getPriorityColor(task.priority), display: 'inline-block', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' }}>
-                          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                        </div>
+                        <PriorityChip priority={task.priority} />
                       </div>
                       {task.description && (
                         <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', margin: '8px 0' }}>
