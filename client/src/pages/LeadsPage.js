@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Users, Plus, Trash2, Search, TrendingUp, ArrowUpRight, CheckCircle } from 'lucide-react';
+import { Users, Plus, Trash2, Search, TrendingUp, ArrowUpRight, CheckCircle, Edit2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { fetchLeads, createLead, deleteLead } from '../redux/leadSlice';
+import { fetchLeads, createLead, deleteLead, updateLead } from '../redux/leadSlice';
 import { StatusChip } from '../utils/statusColors';
 import { toast } from 'react-toastify';
 
@@ -21,6 +21,9 @@ const LeadsPage = () => {
     company: '',
     status: 'new',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingLeadId, setEditingLeadId] = useState(null);
 
   useEffect(() => {
     // Fetch leads on component mount
@@ -36,8 +39,7 @@ const LeadsPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleAddLead = async () => {
-    // Validation
+  const handleAddOrUpdateLead = async () => {
     if (!formData.firstName || formData.firstName.trim().length < 2) {
       toast.error('First name must be at least 2 characters');
       return;
@@ -50,7 +52,7 @@ const LeadsPage = () => {
       toast.error('Email is required');
       return;
     }
-    
+
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
@@ -58,22 +60,28 @@ const LeadsPage = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      // Normalize status to match backend enum (e.g., "new" -> "New")
-      const statusMap = {
-        new: 'New',
-        contacted: 'Contacted',
-        qualified: 'Qualified',
-        unqualified: 'Unqualified',
-        lost: 'Lost',
-      };
+      if (isEditing && editingLeadId) {
+        await dispatch(updateLead(editingLeadId, {
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          status: formData.status.charAt(0).toUpperCase() + formData.status.slice(1),
+        }));
+        toast.success('Lead updated successfully');
+      } else {
+        await dispatch(createLead({
+          ...formData,
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+        }));
+        toast.success('Lead added successfully');
+      }
 
-      await dispatch(createLead({
-        ...formData,
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        status: statusMap[formData.status] || 'New',
-      }));
+      // Clear form and reset editing state
       setFormData({
         firstName: '',
         lastName: '',
@@ -83,9 +91,12 @@ const LeadsPage = () => {
         status: 'new',
       });
       setShowModal(false);
-      toast.success('Lead added successfully');
+      setIsEditing(false);
+      setEditingLeadId(null);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add lead');
+      toast.error(error.response?.data?.message || 'Failed to save lead');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -95,6 +106,23 @@ const LeadsPage = () => {
       toast.success('Lead deleted');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete lead');
+    }
+  };
+
+  const handleEditLead = (leadId) => {
+    const leadToEdit = leads.find((lead) => lead._id === leadId);
+    if (leadToEdit) {
+      setFormData({
+        firstName: leadToEdit.firstName,
+        lastName: leadToEdit.lastName,
+        email: leadToEdit.email,
+        phone: leadToEdit.phone,
+        company: leadToEdit.company,
+        status: leadToEdit.status.toLowerCase(),
+      });
+      setEditingLeadId(leadId);
+      setIsEditing(true);
+      setShowModal(true);
     }
   };
 
@@ -272,7 +300,7 @@ const LeadsPage = () => {
                 <tbody>
                   {filteredLeads.map((lead, index) => (
                     <tr
-                      key={lead.id}
+                      key={lead._id}
                       style={{
                         borderBottom: '1px solid #f3f4f6',
                         background: index % 2 === 0 ? 'white' : '#f9fafb',
@@ -297,7 +325,15 @@ const LeadsPage = () => {
                       </td>
                       <td style={{ padding: '16px 24px' }}>
                         <button
-                          onClick={() => handleDeleteLead(lead.id)}
+                          onClick={() => handleEditLead(lead._id)}
+                          style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                          onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+                          onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteLead(lead._id)}
                           style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
                           onMouseEnter={(e) => e.target.style.color = '#dc2626'}
                           onMouseLeave={(e) => e.target.style.color = '#ef4444'}
@@ -514,32 +550,37 @@ const LeadsPage = () => {
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
-                onClick={handleAddLead}
+                onClick={handleAddOrUpdateLead}
+                disabled={isSubmitting}
                 style={{
                   flex: 1,
                   padding: '12px 24px',
-                  background: '#2563eb',
+                  background: isSubmitting ? '#93c5fd' : '#2563eb',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   fontSize: '15px',
                   fontWeight: '600',
-                  cursor: 'pointer',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
                   transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = '#1d4ed8';
-                  e.target.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.4)';
-                  e.target.style.transform = 'translateY(-2px)';
+                  if (!isSubmitting) {
+                    e.target.style.background = '#1d4ed8';
+                    e.target.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.4)';
+                    e.target.style.transform = 'translateY(-2px)';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = '#2563eb';
-                  e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)';
-                  e.target.style.transform = 'translateY(0)';
+                  if (!isSubmitting) {
+                    e.target.style.background = '#2563eb';
+                    e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)';
+                    e.target.style.transform = 'translateY(0)';
+                  }
                 }}
               >
-                Add Lead
+                {isSubmitting ? 'Submitting...' : isEditing ? 'Update Lead' : 'Add Lead'}
               </button>
               <button
                 onClick={() => setShowModal(false)}

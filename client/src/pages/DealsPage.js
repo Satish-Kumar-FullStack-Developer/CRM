@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { DollarSign, CheckCircle, TrendingUp, Plus, Trash2, BarChart3 } from 'lucide-react';
+import { DollarSign, CheckCircle, TrendingUp, Plus, Trash2, BarChart3, Edit2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { fetchDeals, createDeal, deleteDeal } from '../redux/dealSlice';
+import { fetchDeals, createDeal, deleteDeal, updateDeal } from '../redux/dealSlice';
 import { StatusChip } from '../utils/statusColors';
 import { toast } from 'react-toastify';
 
@@ -19,6 +19,9 @@ const DealsPage = () => {
     probability: 25,
     closingDate: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingDealId, setEditingDealId] = useState(null);
 
   useEffect(() => {
     // Fetch deals on component mount
@@ -31,17 +34,28 @@ const DealsPage = () => {
   const avgDealSize = deals.length > 0 ? Math.round(totalValue / deals.length) : 0;
   const closedWon = deals.filter((d) => d.stage === 'closed').length;
 
-  const handleAddDeal = async () => {
+  const handleAddOrUpdateDeal = async () => {
     if (!formData.title || !formData.value) {
       toast.error('Please fill in required fields');
       return;
     }
+    setIsSubmitting(true);
     try {
-      await dispatch(createDeal({
-        ...formData,
-        value: parseFloat(formData.value),
-        probability: parseInt(formData.probability),
-      }));
+      if (isEditing && editingDealId) {
+        await dispatch(updateDeal(editingDealId, {
+          ...formData,
+          value: parseFloat(formData.value),
+          probability: parseInt(formData.probability),
+        }));
+        toast.success('Deal updated successfully');
+      } else {
+        await dispatch(createDeal({
+          ...formData,
+          value: parseFloat(formData.value),
+          probability: parseInt(formData.probability),
+        }));
+        toast.success('Deal added successfully');
+      }
       setFormData({
         title: '',
         value: '',
@@ -50,9 +64,12 @@ const DealsPage = () => {
         closingDate: '',
       });
       setShowModal(false);
-      toast.success('Deal added successfully');
+      setIsEditing(false);
+      setEditingDealId(null);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add deal');
+      toast.error(error.response?.data?.message || 'Failed to save deal');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -63,6 +80,20 @@ const DealsPage = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete deal');
     }
+  };
+
+  const handleEditDeal = (id) => {
+    const deal = deals.find((d) => d._id === id);
+    setFormData({
+      title: deal.title,
+      value: deal.value,
+      stage: deal.stage,
+      probability: deal.probability,
+      closingDate: deal.closingDate,
+    });
+    setEditingDealId(id);
+    setIsEditing(true);
+    setShowModal(true);
   };
 
   return (
@@ -265,6 +296,14 @@ const DealsPage = () => {
                       <td style={{ padding: '16px 24px', fontSize: '15px', fontWeight: '600', color: '#111827' }}>${Math.round((deal.value * deal.probability) / 100).toLocaleString()}</td>
                       <td style={{ padding: '16px 24px' }}>
                         <button
+                          onClick={() => handleEditDeal(deal._id)}
+                          style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                          onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+                          onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
                           onClick={() => handleDeleteDeal(deal._id)}
                           style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
                           onMouseEnter={(e) => e.target.style.color = '#dc2626'}
@@ -455,32 +494,37 @@ const DealsPage = () => {
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
-                onClick={handleAddDeal}
+                onClick={handleAddOrUpdateDeal}
+                disabled={isSubmitting}
                 style={{
                   flex: 1,
                   padding: '12px 24px',
-                  background: '#16a34a',
+                  background: isSubmitting ? '#bbf7d0' : '#16a34a',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   fontSize: '15px',
                   fontWeight: '600',
-                  cursor: 'pointer',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
                   transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = '#15803d';
-                  e.target.style.boxShadow = '0 6px 16px rgba(22, 163, 74, 0.4)';
-                  e.target.style.transform = 'translateY(-2px)';
+                  if (!isSubmitting) {
+                    e.target.style.background = '#15803d';
+                    e.target.style.boxShadow = '0 6px 16px rgba(22, 163, 74, 0.4)';
+                    e.target.style.transform = 'translateY(-2px)';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = '#16a34a';
-                  e.target.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)';
-                  e.target.style.transform = 'translateY(0)';
+                  if (!isSubmitting) {
+                    e.target.style.background = '#16a34a';
+                    e.target.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)';
+                    e.target.style.transform = 'translateY(0)';
+                  }
                 }}
               >
-                Add Deal
+                {isSubmitting ? 'Submitting...' : isEditing ? 'Update Deal' : 'Add Deal'}
               </button>
               <button
                 onClick={() => setShowModal(false)}

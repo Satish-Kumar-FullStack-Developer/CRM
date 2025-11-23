@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CheckCircle, TrendingUp, Plus, Trash2, Calendar, AlertCircle } from 'lucide-react';
+import { CheckCircle, TrendingUp, Plus, Trash2, Calendar, AlertCircle, Edit2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchTasks, createTask, deleteTask, updateTask, completeTask } from '../redux/taskSlice';
@@ -18,6 +18,9 @@ const TasksPage = () => {
     dueDate: '',
     priority: 'medium',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   useEffect(() => {
     // Fetch tasks on component mount
@@ -29,13 +32,25 @@ const TasksPage = () => {
   const highPriorityCount = tasks.filter((t) => t.priority === 'high').length;
   const completionRate = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
-  const handleAddTask = async () => {
+  const handleAddOrUpdateTask = async () => {
     if (!formData.title) {
       toast.error('Please enter task title');
       return;
     }
+    setIsSubmitting(true);
     try {
-      await dispatch(createTask(formData));
+      if (isEditing && editingTaskId) {
+        await dispatch(updateTask(editingTaskId, {
+          title: formData.title,
+          description: formData.description,
+          dueDate: formData.dueDate,
+          priority: formData.priority,
+        }));
+        toast.success('Task updated successfully');
+      } else {
+        await dispatch(createTask(formData));
+        toast.success('Task added successfully');
+      }
       setFormData({
         title: '',
         description: '',
@@ -43,9 +58,12 @@ const TasksPage = () => {
         priority: 'medium',
       });
       setShowModal(false);
-      toast.success('Task added successfully');
+      setIsEditing(false);
+      setEditingTaskId(null);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add task');
+      toast.error(error.response?.data?.message || 'Failed to save task');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,6 +82,21 @@ const TasksPage = () => {
       toast.success('Task deleted');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete task');
+    }
+  };
+
+  const handleEditTask = (id) => {
+    const taskToEdit = tasks.find((task) => task._id === id);
+    if (taskToEdit) {
+      setFormData({
+        title: taskToEdit.title,
+        description: taskToEdit.description,
+        dueDate: taskToEdit.dueDate.split('T')[0],
+        priority: taskToEdit.priority,
+      });
+      setEditingTaskId(id);
+      setIsEditing(true);
+      setShowModal(true);
     }
   };
 
@@ -194,7 +227,7 @@ const TasksPage = () => {
               <div style={{ divideY: '1px solid #e5e7eb' }}>
                 {filteredTasks.map((task, index) => (
                   <div
-                    key={task.id}
+                    key={task._id}
                     style={{
                       padding: '24px',
                       borderBottom: index < filteredTasks.length - 1 ? '1px solid #e5e7eb' : 'none',
@@ -246,6 +279,14 @@ const TasksPage = () => {
                         </div>
                       )}
                     </div>
+                    <button
+                      onClick={() => handleEditTask(task._id)}
+                      style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
+                      onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+                      onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+                    >
+                      <Edit2 size={18} />
+                    </button>
                     <button
                       onClick={() => handleDeleteTask(task._id)}
                       style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', transition: 'all 0.2s', padding: '4px' }}
@@ -412,32 +453,37 @@ const TasksPage = () => {
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
-                onClick={handleAddTask}
+                onClick={handleAddOrUpdateTask}
+                disabled={isSubmitting}
                 style={{
                   flex: 1,
                   padding: '12px 24px',
-                  background: '#a855f7',
+                  background: isSubmitting ? '#d8b4fe' : '#a855f7',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   fontSize: '15px',
                   fontWeight: '600',
-                  cursor: 'pointer',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)',
                   transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = '#9333ea';
-                  e.target.style.boxShadow = '0 6px 16px rgba(168, 85, 247, 0.4)';
-                  e.target.style.transform = 'translateY(-2px)';
+                  if (!isSubmitting) {
+                    e.target.style.background = '#9333ea';
+                    e.target.style.boxShadow = '0 6px 16px rgba(168, 85, 247, 0.4)';
+                    e.target.style.transform = 'translateY(-2px)';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = '#a855f7';
-                  e.target.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.3)';
-                  e.target.style.transform = 'translateY(0)';
+                  if (!isSubmitting) {
+                    e.target.style.background = '#a855f7';
+                    e.target.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.3)';
+                    e.target.style.transform = 'translateY(0)';
+                  }
                 }}
               >
-                Add Task
+                {isSubmitting ? 'Submitting...' : isEditing ? 'Update Task' : 'Add Task'}
               </button>
               <button
                 onClick={() => setShowModal(false)}
